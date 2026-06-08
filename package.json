@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
-    "@capacitor/android": "^8.3.4",
+    "@capacitor/android": "^8.4.0",
     "@capacitor/core": "^8.3.4",
     "@capacitor/filesystem": "^8.1.2",
     "@capgo/capacitor-printer": "^8.0.14",
