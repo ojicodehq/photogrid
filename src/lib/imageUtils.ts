@@ -1,5 +1,6 @@
 import exifr from "exifr";
 
+import { prepareImage } from "@/lib/imageDownscale";
 import type { PhotoType } from "@/types";
 
 /**
@@ -14,34 +15,65 @@ export const MAX_PHOTOS = 80;
 
 /**
  * Convertit un `File` en `PhotoType` :
- * - crée une blob URL utilisable comme `<img src>`
  * - lit l'EXIF pour récupérer l'orientation source
- * - décode l'image pour obtenir les dimensions naturelles
+ * - prépare l'image (réduction au cap si la photo est sur-résolue, cf.
+ *   `prepareImage`) et crée une blob URL sur le `Blob` retenu
+ * - attribue un `id` stable (clé de persistance IndexedDB)
  *
  * En cas d'échec de décodage (format non supporté), retourne `null` :
  * le caller affiche un toast d'erreur et ignore le fichier.
  */
 export async function fileToPhoto(file: File): Promise<PhotoType | null> {
-  const uri = URL.createObjectURL(file);
-
   try {
     // EXIF : on n'a besoin que de Orientation. exifr accepte un File.
     const exif = await exifr.parse(file, ["Orientation"]).catch(() => null);
     const orientation = (exif?.Orientation as number | undefined) ?? 1;
 
-    const { width, height } = await readImageDimensions(uri, orientation);
+    let blob: Blob;
+    // Assignés dans les deux branches ci-dessous ; tout échec du fallback
+    // relance vers le `catch` externe (→ `null`), jamais lus non initialisés.
+    let width!: number;
+    let height!: number;
+    let exifOrientation: number | undefined;
+    let type: string | undefined;
+    let size: number | undefined;
+
+    try {
+      const prepared = await prepareImage(file, orientation);
+      blob = prepared.blob;
+      width = prepared.width;
+      height = prepared.height;
+      exifOrientation = prepared.exifOrientation;
+      type = prepared.type;
+      size = prepared.size;
+    } catch {
+      // `createImageBitmap` indisponible / format exotique : on garde les
+      // octets originaux et on lit les dimensions via `<img>`.
+      blob = file;
+      exifOrientation = orientation;
+      type = file.type;
+      size = file.size;
+      const probe = URL.createObjectURL(file);
+      try {
+        const dims = await readImageDimensions(probe, orientation);
+        width = dims.width;
+        height = dims.height;
+      } finally {
+        URL.revokeObjectURL(probe);
+      }
+    }
 
     return {
-      uri,
+      id: crypto.randomUUID(),
+      uri: URL.createObjectURL(blob),
       width,
       height,
       name: file.name,
-      type: file.type,
-      size: file.size,
-      exifOrientation: orientation,
+      type,
+      size,
+      exifOrientation,
     };
   } catch {
-    URL.revokeObjectURL(uri);
     return null;
   }
 }

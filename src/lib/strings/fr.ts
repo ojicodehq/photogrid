@@ -157,6 +157,8 @@ export const fr = {
     tooManyPhotos: (max: number) =>
       `Limite atteinte (${max} photos). Supprimez-en avant d'en ajouter d'autres.`,
     printFailed: "L'impression a échoué. Veuillez réessayer.",
+    storageFull:
+      "Stockage plein : cette photo ne sera pas conservée après fermeture. Supprimez-en pour libérer de l'espace.",
   },
 } as const;
 

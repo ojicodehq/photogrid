@@ -1,4 +1,5 @@
 export type PhotoType = {
+  id: string; // identifiant stable, sert de clé IndexedDB
   uri: string; // blob URL via URL.createObjectURL
   width: number;
   height: number;
