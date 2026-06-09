@@ -10,7 +10,7 @@
 #     Sans elle, impossible de signer/chiffrer : l'app rejetterait le bundle.
 #   - Variables d'environnement :
 #       PHOTOGRID_OTA_HOST : hôte SSH de destination
-#       PHOTOGRID_OTA_DIR  : dossier OTA distant (hors NAS)
+#       PHOTOGRID_OTA_DIR  : dossier OTA distant
 #
 # La version publiée est celle de package.json : elle DOIT être strictement
 # supérieure à celle embarquée dans l'APK installé, sinon l'app n'applique

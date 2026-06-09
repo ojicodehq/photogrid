@@ -10,10 +10,9 @@ services:
       - proxy
     volumes:
       # Artefacts OTA (live updates) servis en lecture seule sur /ota.
-      # Dossier dédié sur le NVMe, HORS du NAS (/data/nas) : le conteneur
-      # public ne touche jamais les données privées. À créer une fois côté
-      # hôte : sudo mkdir -p /data/ota/photogrid && sudo chown nicko:nicko ...
-      - /data/ota/photogrid:/usr/share/nginx/ota:ro
+      # Chemin hôte fourni via OTA_DATA_DIR (.env, hors repo), dossier dédié
+      # ne contenant que les bundles publics.
+      - ${OTA_DATA_DIR}:/usr/share/nginx/ota:ro
     security_opt:
       - no-new-privileges:true
     labels:
