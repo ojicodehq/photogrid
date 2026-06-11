@@ -1,5 +1,3 @@
-import exifr from "exifr";
-
 import { prepareImage } from "@/lib/imageDownscale";
 import type { PhotoType } from "@/types";
 
@@ -26,8 +24,17 @@ export const MAX_PHOTOS = 80;
 export async function fileToPhoto(file: File): Promise<PhotoType | null> {
   try {
     // EXIF : on n'a besoin que de Orientation. exifr accepte un File.
-    const exif = await exifr.parse(file, ["Orientation"]).catch(() => null);
-    const orientation = (exif?.Orientation as number | undefined) ?? 1;
+    // Import dynamique : exifr (~270 Ko) ne charge qu'au premier import de
+    // photo, pas au démarrage. S'il est indisponible (chunk non caché),
+    // on continue avec l'orientation par défaut plutôt que de rejeter la photo.
+    let orientation = 1;
+    try {
+      const { default: exifr } = await import("exifr");
+      const exif = await exifr.parse(file, ["Orientation"]).catch(() => null);
+      orientation = (exif?.Orientation as number | undefined) ?? 1;
+    } catch {
+      // Module exifr indisponible : orientation 1.
+    }
 
     let blob: Blob;
     // Assignés dans les deux branches ci-dessous ; tout échec du fallback

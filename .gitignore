@@ -42,3 +42,6 @@ node_modules/.tmp
 # dans capacitor.config.ts et peut rester dans le repo public.
 .capgo_key_v2
 .capgo_key_v2.pub
+
+# Rapports d'audit locaux (jamais dans le repo public)
+docs/security-audit-*.md

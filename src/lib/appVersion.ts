@@ -1,5 +1,4 @@
 import { Capacitor } from "@capacitor/core";
-import { CapacitorUpdater } from "@capgo/capacitor-updater";
 import { useEffect, useState } from "react";
 
 declare const __APP_VERSION__: string;
@@ -20,6 +19,8 @@ export const BUILD_VERSION = __APP_VERSION__;
 export async function getLiveVersion(): Promise<string> {
   if (!Capacitor.isNativePlatform()) return BUILD_VERSION;
   try {
+    // Import dynamique : le plugin Capgo ne charge jamais sur le web.
+    const { CapacitorUpdater } = await import("@capgo/capacitor-updater");
     const res = await CapacitorUpdater.current();
     const version = res?.bundle?.version;
     return version && version !== "builtin" ? version : BUILD_VERSION;

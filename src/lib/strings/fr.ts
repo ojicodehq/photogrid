@@ -65,6 +65,7 @@ export const fr = {
       back: "Retour",
     },
     print: "Imprimer",
+    printing: "Génération…",
     cancel: "Annuler",
     iosHint:
       "Sur iOS, ajoutez d'abord à l'écran d'accueil pour un meilleur rendu.",

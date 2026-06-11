@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { fileToPhoto, MAX_PHOTOS, revokePhotos } from "@/lib/imageUtils";
+import { mapWithConcurrency } from "@/lib/mapWithConcurrency";
 import { fr as t } from "@/lib/strings/fr";
 import { usePhotoGridStore } from "@/lib/store";
 
@@ -42,7 +43,10 @@ export function PhotoSelector() {
       toast.warning(t.errors.tooManyPhotos(MAX_PHOTOS));
     }
 
-    const results = await Promise.all(accepted.map((f) => fileToPhoto(f)));
+    // Concurrence bornée : chaque `fileToPhoto` décode un bitmap complet
+    // (~140 Mo transitoires pour une photo 12 Mpx) — un `Promise.all` non
+    // borné sur un gros lot saturerait la RAM de la WebView mobile.
+    const results = await mapWithConcurrency(accepted, 4, (f) => fileToPhoto(f));
     const ok = results.filter((p): p is NonNullable<typeof p> => p !== null);
     const failed = results.length - ok.length;
 

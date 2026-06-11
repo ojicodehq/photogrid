@@ -8,6 +8,7 @@ import {
   getAllStoredPhotos,
   putPhotos,
 } from "@/lib/photoStorage";
+import { mapWithConcurrency } from "@/lib/mapWithConcurrency";
 import { fr } from "@/lib/strings/fr";
 import type {
   LayoutConfig,
@@ -70,18 +71,18 @@ let photosHydrated = false;
  */
 async function persistPhotos(newPhotos: PhotoType[]): Promise<void> {
   try {
-    const items = await Promise.all(
-      newPhotos.map(async (p) => ({
-        id: p.id,
-        blob: await (await fetch(p.uri)).blob(),
-        width: p.width,
-        height: p.height,
-        name: p.name,
-        type: p.type,
-        size: p.size,
-        exifOrientation: p.exifOrientation,
-      })),
-    );
+    // Concurrence bornée : éviter de matérialiser les blobs de tout un
+    // lot simultanément avant l'écriture IndexedDB.
+    const items = await mapWithConcurrency(newPhotos, 4, async (p) => ({
+      id: p.id,
+      blob: await (await fetch(p.uri)).blob(),
+      width: p.width,
+      height: p.height,
+      name: p.name,
+      type: p.type,
+      size: p.size,
+      exifOrientation: p.exifOrientation,
+    }));
     await putPhotos(items);
   } catch (err) {
     if (err instanceof DOMException && err.name === "QuotaExceededError") {

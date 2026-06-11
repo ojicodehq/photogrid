@@ -1,4 +1,4 @@
-import { ChevronLeft, Pencil, Printer } from "lucide-react";
+import { ChevronLeft, Loader2, Pencil, Printer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -8,7 +8,6 @@ import { PaginationControls } from "@/components/photogrid/PaginationControls";
 import { PhotoGrid } from "@/components/photogrid/PhotoGrid";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getPaperDimensionsMm } from "@/lib/paperSizes";
-import { printDocument } from "@/lib/printService";
 import { fr as t } from "@/lib/strings/fr";
 import { usePhotoGridStore } from "@/lib/store";
 import { usePagination } from "@/lib/usePagination";
@@ -68,6 +67,9 @@ export default function PreviewPage() {
     if (printing) return;
     setPrinting(true);
     try {
+      // Import dynamique : la chaîne d'impression (pdf-lib) ne charge
+      // qu'au premier clic, pas avec le chunk de la page.
+      const { printDocument } = await import("@/lib/printService");
       await printDocument(photos, layout);
     } catch {
       toast.error(t.errors.printFailed);
@@ -260,12 +262,17 @@ export default function PreviewPage() {
             <Button
               size="lg"
               aria-label={t.preview.print}
+              aria-busy={printing}
               disabled={printing}
               onClick={handlePrint}
               className="shadow-primary/30 font-display h-12 w-full justify-center rounded-2xl text-[15px] font-bold tracking-tight shadow-md"
             >
-              <Printer className="size-4" />
-              {t.preview.print}
+              {printing ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Printer className="size-4" />
+              )}
+              {printing ? t.preview.printing : t.preview.print}
             </Button>
           </div>
         </aside>
@@ -317,12 +324,17 @@ export default function PreviewPage() {
         <Button
           size="lg"
           aria-label={t.preview.print}
+          aria-busy={printing}
           disabled={printing}
           className="shadow-primary/30 font-display h-14 rounded-full px-7 text-[15px] font-bold tracking-tight shadow-lg"
           onClick={handlePrint}
         >
-          <Printer className="size-5" />
-          <span>{t.preview.print}</span>
+          {printing ? (
+            <Loader2 className="size-5 animate-spin" />
+          ) : (
+            <Printer className="size-5" />
+          )}
+          <span>{printing ? t.preview.printing : t.preview.print}</span>
         </Button>
       </div>
     </div>

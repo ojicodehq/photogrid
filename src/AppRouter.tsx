@@ -1,10 +1,15 @@
+import { lazy } from "react";
 import { HashRouter, Route, Routes } from "react-router-dom";
 
 import { AppShell } from "@/AppShell";
-import HomePage from "@/pages/HomePage";
-import PreviewPage from "@/pages/PreviewPage";
-import SettingsPage from "@/pages/SettingsPage";
-import WelcomePage from "@/pages/WelcomePage";
+
+// Pages en lazy : chaque route a son chunk, chargé au premier accès
+// (puis servi depuis le cache Serwist). pdf-lib, exifr et les plugins
+// Capacitor restent ainsi hors du bundle initial.
+const WelcomePage = lazy(() => import("@/pages/WelcomePage"));
+const HomePage = lazy(() => import("@/pages/HomePage"));
+const PreviewPage = lazy(() => import("@/pages/PreviewPage"));
+const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 
 /**
  * Routeur de l'application.

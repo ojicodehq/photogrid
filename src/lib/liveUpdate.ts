@@ -1,5 +1,4 @@
 import { Capacitor } from "@capacitor/core";
-import { CapacitorUpdater } from "@capgo/capacitor-updater";
 
 /**
  * Signale au plugin de live-update (Capgo) que l'app a démarré correctement.
@@ -16,6 +15,8 @@ import { CapacitorUpdater } from "@capgo/capacitor-updater";
 export async function notifyAppReady(): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
   try {
+    // Import dynamique : le plugin Capgo ne charge jamais sur le web.
+    const { CapacitorUpdater } = await import("@capgo/capacitor-updater");
     await CapacitorUpdater.notifyAppReady();
   } catch (err) {
     console.warn("Live-update : notifyAppReady a échoué", err);
