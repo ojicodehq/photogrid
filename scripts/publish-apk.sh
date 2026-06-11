@@ -12,6 +12,10 @@
 #
 # Usage : PHOTOGRID_REMOTE_HOST=... PHOTOGRID_REMOTE_DIR=... npm run publish:apk
 #
+# Étape optionnelle : si `gh` est installé et authentifié, l'APK signé est aussi
+# publié sur GitHub Releases (tag vX.Y.Z = version de package.json, synchronisée
+# avec build.gradle par le bump APK). Un échec de cette étape n'annule pas le SCP.
+#
 set -euo pipefail
 
 SLUG="photogrid"
@@ -48,3 +52,23 @@ scp "$APK_SRC" "$REMOTE_HOST:$REMOTE_DIR/$SLUG.apk"
 scp "$TMP_JSON" "$REMOTE_HOST:$REMOTE_DIR/$SLUG.json"
 
 echo "✓ $SLUG.apk (v$VERSION) publié sur $REMOTE_HOST:$REMOTE_DIR."
+
+# Release GitHub (optionnelle) : publie l'APK signé sur la page Releases, taguée
+# v$VERSION. Étape secondaire — un échec ici n'annule pas la livraison SCP.
+TAG="v$VERSION"
+if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+    echo "→ Release GitHub $TAG…"
+    if gh release view "$TAG" >/dev/null 2>&1; then
+        gh release upload "$TAG" "$APK_SRC#$SLUG-$TAG.apk" --clobber \
+            && echo "✓ APK ajouté à la release $TAG existante." \
+            || echo "⚠ Échec de l'upload sur la release $TAG (ignoré)."
+    else
+        gh release create "$TAG" "$APK_SRC#$SLUG-$TAG.apk" \
+            --title "$APP_NAME $TAG" \
+            --notes "Signed Android APK for $APP_NAME $TAG. The web layer ships separately via OTA." \
+            && echo "✓ Release GitHub $TAG créée." \
+            || echo "⚠ Échec de création de la release $TAG (ignoré)."
+    fi
+else
+    echo "ℹ gh absent ou non authentifié : release GitHub ignorée."
+fi
