@@ -5,14 +5,22 @@ import { fr as t } from "@/lib/strings/fr";
 
 import { ThemeToggle } from "./ThemeToggle";
 
+const NAV_HEIGHT = 64; // hauteur de la barre (h-16)
+
 /**
- * Défile en douceur vers une section.
+ * Défile en douceur vers une section, en compensant la hauteur de la barre
+ * collante.
  *
- * On n'utilise PAS d'ancres `href="#id"` : l'app tourne sous `HashRouter`,
- * qui interpréterait le hash comme une route et casserait la navigation.
+ * On n'utilise PAS d'ancres `href="#id"` (le `HashRouter` les prendrait pour
+ * des routes), ni `scrollIntoView` + `scroll-margin` : leur combinaison avec
+ * un défilement « smooth » provoque un rebond et un alignement approximatif.
+ * Un `scrollTo` avec position calculée est déterministe.
  */
 function scrollToId(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const el = document.getElementById(id);
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT - 12;
+  window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
 }
 
 /**
@@ -68,8 +76,8 @@ export function LandingNav() {
             <Link
               to="/home"
               className={buttonVariants({
-                size: "sm",
-                className: "rounded-full px-4 font-semibold",
+                className:
+                  "h-9 rounded-full px-5 text-[14px] font-semibold tracking-tight",
               })}
             >
               {t.welcome.cta}
