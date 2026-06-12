@@ -58,15 +58,19 @@ export function LandingNav() {
           </button>
         </nav>
 
-        <Link
-          to="/home"
-          className={buttonVariants({
-            size: "sm",
-            className: "rounded-full px-4 font-semibold",
-          })}
-        >
-          {t.welcome.cta}
-        </Link>
+        {/* CTA masqué en mobile : le hero a déjà son bouton « Commencer »
+            proéminent. On évite ainsi le doublon sur petit écran. */}
+        <div className="hidden lg:block">
+          <Link
+            to="/home"
+            className={buttonVariants({
+              size: "sm",
+              className: "rounded-full px-4 font-semibold",
+            })}
+          >
+            {t.welcome.cta}
+          </Link>
+        </div>
       </div>
     </header>
   );
