@@ -40,7 +40,15 @@ export default function WelcomePage() {
 
             <div className="relative z-10 pt-[56px]">
               <Eyebrow />
-              <h1 className="font-display mt-4 text-[42px] leading-[0.98] font-extrabold tracking-[-0.02em]">
+              {/* Halo couleur-fond : le titre reste lisible même posé sur une
+                  photo claire (theme-aware via --background). */}
+              <h1
+                className="font-display mt-4 text-[42px] leading-[0.98] font-extrabold tracking-[-0.02em]"
+                style={{
+                  textShadow:
+                    "0 0 10px var(--background), 0 0 10px var(--background), 0 1px 2px var(--background)",
+                }}
+              >
                 {t.welcome.titleMain}
                 <span className="font-accent text-primary mt-1.5 block text-[39px] font-medium italic tracking-[-0.01em]">
                   {t.welcome.titleAccent}

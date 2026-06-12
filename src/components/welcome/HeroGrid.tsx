@@ -50,7 +50,8 @@ export function HeroGrid({ cells, columns, size = "sm", className }: HeroGridPro
             <div
               key={i}
               className={cn(
-                "hero-cell aspect-square bg-cover bg-center ring-1 ring-black/5 shadow-sm",
+                // ring + ombre theme-aware : même un ciel clair se détache du cream
+                "hero-cell ring-foreground/15 aspect-square bg-cover bg-center shadow-md shadow-black/20 ring-1",
                 rounded,
               )}
               style={{
@@ -65,7 +66,7 @@ export function HeroGrid({ cells, columns, size = "sm", className }: HeroGridPro
             <div
               key={i}
               className={cn(
-                "bg-foreground/[0.035] ring-foreground/10 aspect-square ring-1 ring-inset",
+                "bg-foreground/[0.05] ring-foreground/15 aspect-square ring-1 ring-inset",
                 rounded,
               )}
             />
@@ -75,7 +76,7 @@ export function HeroGrid({ cells, columns, size = "sm", className }: HeroGridPro
           return (
             <div
               key={i}
-              className={cn("hero-next bg-primary/5 aspect-square", rounded)}
+              className={cn("hero-next bg-primary/10 aspect-square", rounded)}
             />
           );
         }
@@ -85,13 +86,17 @@ export function HeroGrid({ cells, columns, size = "sm", className }: HeroGridPro
   );
 }
 
-/** Motif mobile : bande de photos en haut, titre dégagé, accent en bas à droite. */
+/**
+ * Motif mobile : cluster de photos en haut à droite, plus dense (peu de vides
+ * qui « clignotent » en light), une seule case « next » comme accent. La
+ * colonne gauche reste libre pour le titre.
+ */
 export const HERO_CELLS_MOBILE: HeroCell[] = [
   "photo", "photo", "photo", "photo",
   "gap",   "photo", "photo", "photo",
-  "gap",   "gap",   "gap",   "next",
+  "gap",   "gap",   "photo", "photo",
+  "gap",   "gap",   "next",  "photo",
   "gap",   "gap",   "gap",   "photo",
-  "gap",   "gap",   "gap",   "gap",
 ];
 
 /** Motif desktop : grille plus pleine, lecture « voilà le résultat ». */
