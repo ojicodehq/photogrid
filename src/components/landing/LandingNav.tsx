@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { buttonVariants } from "@/components/ui/button";
 import { fr as t } from "@/lib/strings/fr";
 
+import { ThemeToggle } from "./ThemeToggle";
+
 /**
  * Défile en douceur vers une section.
  *
@@ -20,7 +22,7 @@ function scrollToId(id: string) {
  */
 export function LandingNav() {
   return (
-    <header className="bg-background/80 border-border sticky top-0 z-30 border-b backdrop-blur-md">
+    <header className="bg-background/80 border-border sticky top-0 z-50 border-b backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6 lg:px-8">
         <div className="flex items-center gap-2.5">
           <div className="bg-primary text-primary-foreground font-display flex size-8 items-center justify-center rounded-lg text-[13px] font-bold tracking-tight">
@@ -58,18 +60,21 @@ export function LandingNav() {
           </button>
         </nav>
 
-        {/* CTA masqué en mobile : le hero a déjà son bouton « Commencer »
-            proéminent. On évite ainsi le doublon sur petit écran. */}
-        <div className="hidden lg:block">
-          <Link
-            to="/home"
-            className={buttonVariants({
-              size: "sm",
-              className: "rounded-full px-4 font-semibold",
-            })}
-          >
-            {t.welcome.cta}
-          </Link>
+        <div className="flex items-center gap-1.5">
+          <ThemeToggle />
+          {/* CTA masqué en mobile : le hero a déjà son bouton « Commencer »
+              proéminent. On évite ainsi le doublon sur petit écran. */}
+          <div className="hidden lg:block">
+            <Link
+              to="/home"
+              className={buttonVariants({
+                size: "sm",
+                className: "rounded-full px-4 font-semibold",
+              })}
+            >
+              {t.welcome.cta}
+            </Link>
+          </div>
         </div>
       </div>
     </header>
