@@ -25,6 +25,76 @@ export const fr = {
       instant: { label: "Instantané", hint: "Aperçu live" },
     },
   },
+  landing: {
+    nav: {
+      how: "Comment ça marche",
+      formats: "Formats",
+      faq: "FAQ",
+    },
+    how: {
+      eyebrow: "Comment ça marche",
+      title: "Imprimer plusieurs photos sur une feuille, en trois étapes",
+      lead: "Aucun logiciel à installer, aucune photo envoyée sur un serveur. Tout se passe dans votre navigateur.",
+      steps: [
+        {
+          n: "01",
+          title: "Ajoutez vos photos",
+          text: "Glissez vos images depuis votre téléphone ou votre ordinateur. Elles restent sur votre appareil.",
+        },
+        {
+          n: "02",
+          title: "Choisissez le format et la grille",
+          text: "A4, A5, Letter ou Legal, en portrait ou paysage. Réglez les colonnes, les lignes, les marges et l'espacement.",
+        },
+        {
+          n: "03",
+          title: "Imprimez ou exportez en PDF",
+          text: "La grille sort à l'échelle millimétrique exacte. Ce que vous voyez à l'écran correspond à ce qui sort de l'imprimante.",
+        },
+      ],
+    },
+    formats: {
+      eyebrow: "Formats d'impression",
+      title: "Quatre formats, à la taille réelle",
+      lead: "Chaque format respecte ses dimensions exactes, pour une impression fidèle sans rognage surprise.",
+      items: [
+        { name: "A4", dim: "210 × 297 mm", ratio: 71 },
+        { name: "A5", dim: "148 × 210 mm", ratio: 50 },
+        { name: "Letter", dim: "216 × 279 mm", ratio: 77 },
+        { name: "Legal", dim: "216 × 356 mm", ratio: 100 },
+      ],
+    },
+    faq: {
+      eyebrow: "Questions fréquentes",
+      title: "Ce que les gens demandent",
+      items: [
+        {
+          q: "Comment imprimer plusieurs photos sur une seule feuille A4 ?",
+          a: "Ouvrez PhotoGrid, ajoutez vos photos, choisissez le format A4 puis réglez la grille (par exemple 2 colonnes sur 3 lignes pour 6 photos). Lancez l'impression ou exportez un PDF. Les photos sont placées à l'échelle exacte sur la page.",
+        },
+        {
+          q: "Mes photos sont-elles envoyées sur un serveur ?",
+          a: "Non. PhotoGrid fonctionne entièrement dans votre navigateur. Vos images ne quittent jamais votre appareil, et l'application marche même hors-ligne une fois installée.",
+        },
+        {
+          q: "PhotoGrid est-il gratuit ?",
+          a: "Oui, gratuit et sans inscription. Vous pouvez l'utiliser depuis le web ou l'installer comme application (PWA), ainsi qu'en application Android.",
+        },
+        {
+          q: "Puis-je imprimer à une taille précise ?",
+          a: "Oui. La composition est calculée en millimètres : la taille à l'écran correspond exactement à la taille imprimée, sans mise à l'échelle automatique de l'imprimante.",
+        },
+        {
+          q: "Est-ce que ça marche sur téléphone ?",
+          a: "Oui, l'interface est pensée pour le mobile. Vous pouvez aussi installer PhotoGrid sur l'écran d'accueil pour l'ouvrir comme une vraie application.",
+        },
+      ],
+    },
+    footer: {
+      tagline: "Une application Ojicode, 100 % hors-ligne et sans compte.",
+      cta: "Composer ma première page",
+    },
+  },
   home: {
     title: "Mes photos",
     empty: {

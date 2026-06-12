@@ -96,6 +96,56 @@
         }
       }
     </script>
+
+    <!-- FAQ structurée (doit rester synchrone avec la FAQ de la landing) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Comment imprimer plusieurs photos sur une seule feuille A4 ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ouvrez PhotoGrid, ajoutez vos photos, choisissez le format A4 puis réglez la grille (par exemple 2 colonnes sur 3 lignes pour 6 photos). Lancez l'impression ou exportez un PDF. Les photos sont placées à l'échelle exacte sur la page."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Mes photos sont-elles envoyées sur un serveur ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Non. PhotoGrid fonctionne entièrement dans votre navigateur. Vos images ne quittent jamais votre appareil, et l'application marche même hors-ligne une fois installée."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "PhotoGrid est-il gratuit ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Oui, gratuit et sans inscription. Vous pouvez l'utiliser depuis le web ou l'installer comme application (PWA), ainsi qu'en application Android."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Puis-je imprimer à une taille précise ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Oui. La composition est calculée en millimètres : la taille à l'écran correspond exactement à la taille imprimée, sans mise à l'échelle automatique de l'imprimante."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Est-ce que ça marche sur téléphone ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Oui, l'interface est pensée pour le mobile. Vous pouvez aussi installer PhotoGrid sur l'écran d'accueil pour l'ouvrir comme une vraie application."
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body class="bg-background text-foreground flex min-h-full flex-col">
     <div id="root"></div>
