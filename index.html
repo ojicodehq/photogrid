@@ -10,6 +10,30 @@
     />
     <meta name="application-name" content="PhotoGrid" />
     <meta name="theme-color" content="#C4693D" />
+    <link rel="canonical" href="https://photogrid.ojicode.fr/" />
+
+    <!-- Open Graph (aperçu au partage : LinkedIn, WhatsApp, Discord…) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="PhotoGrid" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:title" content="PhotoGrid : imprimez plusieurs photos sur une page" />
+    <meta
+      property="og:description"
+      content="Composez une grille et imprimez plusieurs photos sur une page A4, A5, Letter ou Legal, à l'échelle exacte. Web installable + Android, 100% hors-ligne."
+    />
+    <meta property="og:url" content="https://photogrid.ojicode.fr/" />
+    <meta property="og:image" content="https://photogrid.ojicode.fr/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="PhotoGrid : imprimez plusieurs photos sur une page" />
+    <meta
+      name="twitter:description"
+      content="Composez une grille et imprimez plusieurs photos sur une page A4, A5, Letter ou Legal. Web installable + Android, 100% hors-ligne."
+    />
+    <meta name="twitter:image" content="https://photogrid.ojicode.fr/og-image.png" />
 
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -39,9 +63,67 @@
     <!-- CSP + security headers : servis par nginx (cf. nginx.conf).
          Pas de CSP en <meta> ici : ce même index.html sert aussi de
          WebView Capacitor, où une CSP figée gênerait le bridge natif. -->
+
+    <!-- Données structurées (Google rich results + compréhension par les IA) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "PhotoGrid",
+        "url": "https://photogrid.ojicode.fr/",
+        "description": "Application web pour composer et imprimer plusieurs photos sur une même page A4, A5, Letter ou Legal, à l'échelle millimétrique exacte. Installable (PWA), fonctionne hors-ligne, aussi disponible en application Android.",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web, Android",
+        "browserRequirements": "Requires JavaScript. Requires HTML5.",
+        "inLanguage": "fr-FR",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "featureList": [
+          "Impression de plusieurs photos sur une page",
+          "Formats A4, A5, Letter et Legal",
+          "Réglage de la grille : colonnes, lignes, marges, espacement",
+          "Export PDF à l'échelle exacte",
+          "Fonctionne hors-ligne (PWA)"
+        ],
+        "author": {
+          "@type": "Organization",
+          "name": "Ojicode",
+          "url": "https://ojicode.fr/"
+        }
+      }
+    </script>
   </head>
   <body class="bg-background text-foreground flex min-h-full flex-col">
     <div id="root"></div>
+
+    <!-- Contenu de repli pour les visiteurs et robots sans JavaScript (dont les
+         crawlers IA : GPTBot, ClaudeBot, PerplexityBot…). N'apparaît jamais quand
+         le JS est actif : aucun flash, aucun contenu masqué côté navigateur. -->
+    <noscript>
+      <main style="max-width:44rem;margin:0 auto;padding:2.5rem 1.5rem;font-family:system-ui,-apple-system,sans-serif;line-height:1.6">
+        <h1>PhotoGrid : imprimez plusieurs photos sur une seule page</h1>
+        <p>
+          PhotoGrid est une application web gratuite pour composer une grille de
+          photos et les imprimer sur une même feuille au format A4, A5, Letter ou
+          Legal, à l'échelle millimétrique exacte. Elle s'utilise directement dans
+          le navigateur, s'installe (PWA), fonctionne hors-ligne et existe aussi en
+          application Android.
+        </p>
+        <h2>Ce que vous pouvez faire</h2>
+        <ul>
+          <li>Imprimer plusieurs photos sur une page (planche photo, mosaïque, contact sheet)</li>
+          <li>Choisir le format de page (A4, A5, Letter, Legal) et l'orientation</li>
+          <li>Régler la grille : colonnes, lignes, marges et espacement</li>
+          <li>Exporter en PDF à l'échelle exacte pour une impression fidèle</li>
+          <li>Travailler hors-ligne, sans compte, sans envoyer vos photos sur un serveur</li>
+        </ul>
+        <p><a href="https://photogrid.ojicode.fr/">Ouvrir PhotoGrid</a> · une application <a href="https://ojicode.fr/">Ojicode</a></p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

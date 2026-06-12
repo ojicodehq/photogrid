@@ -1,0 +1,8 @@
+# PhotoGrid — robots.txt
+# On autorise explicitement tous les robots, y compris les crawlers IA
+# (GPTBot, ClaudeBot, PerplexityBot…), pour maximiser la découvrabilité.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://photogrid.ojicode.fr/sitemap.xml

@@ -34,5 +34,21 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop.png",
+      "sizes": "1280x832",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Composer une grille de photos à imprimer (bureau)"
+    },
+    {
+      "src": "/screenshots/mobile.png",
+      "sizes": "414x896",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "PhotoGrid sur mobile"
+    }
   ]
 }

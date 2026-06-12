@@ -1,13 +1,24 @@
 # PhotoGrid
 
-PWA d'impression de photos sur page **A4 / A5 / Letter / Legal**. Composez une
-grille de photos et imprimez-la à l'échelle millimétrique exacte.
+Imprimez plusieurs photos sur une seule feuille. PhotoGrid compose une grille de
+photos et l'imprime à l'échelle millimétrique exacte, aux formats
+**A4 / A5 / Letter / Legal**. Tout se passe dans le navigateur : aucune photo
+n'est envoyée sur un serveur, et l'application fonctionne hors-ligne.
+
+Pratique pour des planches photo, des mosaïques, des contact sheets, ou pour
+caser plusieurs tirages sur une même page sans gâcher de papier.
 
 **React 19 + Vite + Tailwind 4 + base-ui.** Application 100 % client, installable
-(PWA), conçue pour fonctionner hors-ligne. Également packagée en application
-Android via Capacitor.
+(PWA). Également packagée en application Android via Capacitor.
 
-<!-- Captures d'écran à ajouter ici (mobile + desktop). -->
+- Application web : https://photogrid.ojicode.fr
+- Application Android (APK signé) : voir les [Releases](https://github.com/ojicodehq/photogrid/releases)
+
+## Aperçu
+
+![PhotoGrid sur ordinateur](./public/screenshots/desktop.png)
+
+<img src="./public/screenshots/mobile.png" alt="PhotoGrid sur mobile" width="280" />
 
 ## Installation
 
@@ -15,7 +26,7 @@ Android via Capacitor.
 menu → *Ajouter à l'écran d'accueil*. L'app s'installe et fonctionne hors-ligne.
 
 **En APK Android** : autorisez l'installation depuis des sources inconnues,
-puis ouvrez le fichier `.apk`.
+puis ouvrez le fichier `.apk` (disponible dans les Releases).
 
 ## Fonctionnement
 
@@ -23,6 +34,17 @@ puis ouvrez le fichier `.apk`.
 2. Choisissez le format de page (A4, A5, Letter, Legal) et l'orientation.
 3. Réglez la grille : colonnes, lignes, marges, espacement.
 4. Imprimez ou exportez en PDF, au format millimétrique exact.
+
+## Versions : web et Android
+
+La couche web et l'APK Android sont distribués séparément, leurs numéros de
+version peuvent donc différer (c'est normal) :
+
+- **Web (PWA)** : mise à jour en continu par OTA, sans réinstallation.
+- **APK Android** : publié et signé dans les [Releases](https://github.com/ojicodehq/photogrid/releases) GitHub.
+
+La couche web évolue plus vite que le binaire Android, qui n'est republié que
+lorsqu'un changement natif le nécessite.
 
 ## Prérequis
 
