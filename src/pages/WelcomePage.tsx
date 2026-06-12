@@ -1,13 +1,20 @@
 import { Layers, Sparkles, WifiOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 
 import { buttonVariants } from "@/components/ui/button";
 import { LandingContent } from "@/components/landing/LandingContent";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { PhotoFan } from "@/components/welcome/PhotoFan";
+import { isAppMode } from "@/lib/platform";
 import { fr as t } from "@/lib/strings/fr";
 
 export default function WelcomePage() {
+  // App installée (PWA standalone ou Capacitor) : on saute la landing
+  // marketing et on va droit à l'outil.
+  if (isAppMode()) {
+    return <Navigate to="/home" replace />;
+  }
+
   return (
     <div className="flex min-h-dvh flex-col">
       <LandingNav />
