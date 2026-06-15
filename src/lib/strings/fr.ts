@@ -122,6 +122,10 @@ export const fr = {
         : n === 1
           ? "1 emplacement libre"
           : `${n} emplacements libres`,
+    importing: (done: number, total: number) =>
+      `Importation… ${done}/${total}`,
+    imported: (n: number) =>
+      n === 1 ? "1 photo ajoutée" : `${n} photos ajoutées`,
   },
   preview: {
     title: "Prévisualisation",
@@ -225,6 +229,8 @@ export const fr = {
       "L'accès à vos photos est nécessaire pour utiliser l'application.",
     fileTypeUnsupported: (name: string) =>
       `Format non supporté : ${name}. Préférez JPEG ou PNG.`,
+    importFailed: (name: string, reason: string) =>
+      `Impossible d'ajouter ${name} (${reason}). Faites une capture d'écran et envoyez-la nous.`,
     tooManyPhotos: (max: number) =>
       `Limite atteinte (${max} photos). Supprimez-en avant d'en ajouter d'autres.`,
     printFailed: "L'impression a échoué. Veuillez réessayer.",

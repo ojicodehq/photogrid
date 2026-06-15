@@ -4,12 +4,27 @@ import type { PhotoType } from "@/types";
 /**
  * Limite douce sur le nombre de photos chargées simultanément.
  *
- * Chaque photo crée une blob URL qui maintient l'image en RAM côté
- * navigateur. Sur mobile, dépasser cette limite peut faire crasher
- * l'onglet (notamment iOS Safari, plus restrictif). Au-delà, on
- * affiche un toast d'avertissement et on refuse les nouveaux fichiers.
+ * Calée sur le plafond du Photo Picker Android (100, cf.
+ * `getPickImagesMaxLimit`) : au-delà, le sélecteur système ne renvoie de
+ * toute façon pas plus de fichiers en une seule sélection. Chaque photo
+ * conserve une blob URL (image compressée) en RAM ; 100 reste sûr sur les
+ * WebView et navigateurs mobiles récents. Au-delà, on affiche un toast et
+ * on refuse les nouveaux fichiers (l'utilisateur peut ajouter par lots).
  */
-export const MAX_PHOTOS = 80;
+export const MAX_PHOTOS = 100;
+
+/**
+ * Résultat d'un import : succès porteur de la `PhotoType`, ou échec
+ * porteur du nom du fichier et de la raison technique réelle.
+ *
+ * On renvoie la raison (et non un simple `null`) pour pouvoir l'afficher
+ * à l'utilisateur : sur mobile il n'y a pas de console, et un message
+ * générique « format non supporté » masque la vraie cause (décodage,
+ * mémoire, picker WebView…) et nous prive de tout diagnostic terrain.
+ */
+export type PhotoImportResult =
+  | { ok: true; photo: PhotoType }
+  | { ok: false; name: string; reason: string };
 
 /**
  * Convertit un `File` en `PhotoType` :
@@ -18,10 +33,10 @@ export const MAX_PHOTOS = 80;
  *   `prepareImage`) et crée une blob URL sur le `Blob` retenu
  * - attribue un `id` stable (clé de persistance IndexedDB)
  *
- * En cas d'échec de décodage (format non supporté), retourne `null` :
- * le caller affiche un toast d'erreur et ignore le fichier.
+ * Ne `throw` jamais (sinon `mapWithConcurrency` ferait échouer tout le
+ * lot) : en cas d'échec, renvoie `{ ok: false, reason }` avec le détail.
  */
-export async function fileToPhoto(file: File): Promise<PhotoType | null> {
+export async function fileToPhoto(file: File): Promise<PhotoImportResult> {
   try {
     // EXIF : on n'a besoin que de Orientation. exifr accepte un File.
     // Import dynamique : exifr (~270 Ko) ne charge qu'au premier import de
@@ -71,17 +86,27 @@ export async function fileToPhoto(file: File): Promise<PhotoType | null> {
     }
 
     return {
-      id: crypto.randomUUID(),
-      uri: URL.createObjectURL(blob),
-      width,
-      height,
-      name: file.name,
-      type,
-      size,
-      exifOrientation,
+      ok: true,
+      photo: {
+        id: crypto.randomUUID(),
+        uri: URL.createObjectURL(blob),
+        width,
+        height,
+        name: file.name,
+        type,
+        size,
+        exifOrientation,
+      },
     };
-  } catch {
-    return null;
+  } catch (err) {
+    // Raison technique réelle (nom + message de l'erreur, ou valeur brute) :
+    // affichée temporairement à l'utilisateur pour diagnostiquer les échecs
+    // d'import sur les appareils où nous n'avons pas de console.
+    const reason =
+      err instanceof Error
+        ? `${err.name}: ${err.message}`
+        : String(err);
+    return { ok: false, name: file.name, reason };
   }
 }
 

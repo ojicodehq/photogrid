@@ -6,11 +6,12 @@
 # (signingConfig dans app/build.gradle lisant un keystore + mots de passe
 #  depuis android/gradle.properties — ces fichiers restent HORS du dépôt).
 #
-# Configurer avant usage (variables d'environnement) :
-#   PHOTOGRID_REMOTE_HOST : hôte SSH de destination
-#   PHOTOGRID_REMOTE_DIR  : dossier distant où déposer l'APK
+# Configurer avant usage : PHOTOGRID_REMOTE_HOST (hôte SSH) et
+# PHOTOGRID_REMOTE_DIR (dossier distant où déposer l'APK), définis dans
+# `.env.local` (gitignoré, chargé automatiquement ci-dessous) ou passés en
+# variables d'environnement. Voir `.env.example`.
 #
-# Usage : PHOTOGRID_REMOTE_HOST=... PHOTOGRID_REMOTE_DIR=... npm run publish:apk
+# Usage : npm run release:apk   (bump + build + publish)
 #
 # Étape optionnelle : si `gh` est installé et authentifié, l'APK signé est aussi
 # publié sur GitHub Releases (tag vX.Y.Z = version de package.json, synchronisée
@@ -18,13 +19,21 @@
 #
 set -euo pipefail
 
+cd "$(dirname "$0")/.."
+ROOT="$(pwd)"
+
+# Charge les valeurs d'infra locales si présentes (cf. publish-bundle.sh).
+# `.env.local` est gitignoré : valeurs réelles, jamais committées (repo public).
+set -a
+# shellcheck disable=SC1091
+[ -f "$ROOT/.env.local" ] && . "$ROOT/.env.local"
+set +a
+
 SLUG="photogrid"
 APP_NAME="PhotoGrid"
-REMOTE_HOST="${PHOTOGRID_REMOTE_HOST:?Définir PHOTOGRID_REMOTE_HOST (hôte SSH de destination)}"
-REMOTE_DIR="${PHOTOGRID_REMOTE_DIR:?Définir PHOTOGRID_REMOTE_DIR (dossier distant des APK)}"
+REMOTE_HOST="${PHOTOGRID_REMOTE_HOST:?Définir PHOTOGRID_REMOTE_HOST dans .env.local (hôte SSH de destination)}"
+REMOTE_DIR="${PHOTOGRID_REMOTE_DIR:?Définir PHOTOGRID_REMOTE_DIR dans .env.local (dossier distant des APK)}"
 APK_SRC="android/app/build/outputs/apk/release/app-release.apk"
-
-cd "$(dirname "$0")/.."
 
 VERSION=$(node -p "require('./package.json').version")
 
