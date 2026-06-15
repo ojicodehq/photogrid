@@ -8,26 +8,34 @@
 # Prérequis :
 #   - .capgo_key_v2 présent à la racine (clé privée E2E, JAMAIS commitée).
 #     Sans elle, impossible de signer/chiffrer : l'app rejetterait le bundle.
-#   - Variables d'environnement :
-#       PHOTOGRID_OTA_HOST : hôte SSH de destination
-#       PHOTOGRID_OTA_DIR  : dossier OTA distant
+#   - PHOTOGRID_OTA_HOST (hôte SSH) et PHOTOGRID_OTA_DIR (dossier distant) :
+#     définis dans `.env.local` (gitignoré, chargé automatiquement ci-dessous)
+#     ou passés en variables d'environnement. Voir `.env.example`.
 #
 # La version publiée est celle de package.json : elle DOIT être strictement
 # supérieure à celle embarquée dans l'APK installé, sinon l'app n'applique
 # pas la mise à jour. Utiliser `npm run release:ota` qui bumpe avant.
 #
-# Usage : PHOTOGRID_OTA_HOST=... PHOTOGRID_OTA_DIR=... npm run publish:bundle
+# Usage : npm run release:ota   (ou npm run publish:bundle si déjà bumpé)
 #
 set -euo pipefail
+
+cd "$(dirname "$0")/.."
+ROOT="$(pwd)"
+
+# Charge les valeurs d'infra locales (hôte SSH, dossier distant) si présentes.
+# `.env.local` est gitignoré : il porte les valeurs réelles, jamais committées
+# (repo public). `set -a` exporte automatiquement les variables ainsi lues.
+set -a
+# shellcheck disable=SC1091
+[ -f "$ROOT/.env.local" ] && . "$ROOT/.env.local"
+set +a
 
 SLUG="photogrid"
 APP_ID="fr.ojicode.photogrid"
 PUBLIC_BASE="https://photogrid.ojicode.fr/ota"
-REMOTE_HOST="${PHOTOGRID_OTA_HOST:?Définir PHOTOGRID_OTA_HOST (hôte SSH de destination)}"
-REMOTE_DIR="${PHOTOGRID_OTA_DIR:?Définir PHOTOGRID_OTA_DIR (dossier OTA distant)}"
-
-cd "$(dirname "$0")/.."
-ROOT="$(pwd)"
+REMOTE_HOST="${PHOTOGRID_OTA_HOST:?Définir PHOTOGRID_OTA_HOST dans .env.local (hôte SSH de destination)}"
+REMOTE_DIR="${PHOTOGRID_OTA_DIR:?Définir PHOTOGRID_OTA_DIR dans .env.local (dossier OTA distant)}"
 
 if [ ! -f "$ROOT/.capgo_key_v2" ]; then
     echo "✗ Clé privée .capgo_key_v2 absente : impossible de chiffrer le bundle." >&2

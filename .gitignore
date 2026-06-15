@@ -24,6 +24,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# … sauf le template, qui ne contient que des placeholders et documente
+# les variables attendues (cf. scripts/publish-*.sh).
+!.env.example
 
 # typescript / vite caches
 *.tsbuildinfo
