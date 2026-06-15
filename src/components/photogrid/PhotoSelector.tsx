@@ -7,6 +7,7 @@ import { fileToPhoto, MAX_PHOTOS, revokePhotos } from "@/lib/imageUtils";
 import { mapWithConcurrency } from "@/lib/mapWithConcurrency";
 import { fr as t } from "@/lib/strings/fr";
 import { usePhotoGridStore } from "@/lib/store";
+import type { PhotoType } from "@/types";
 
 /**
  * Composant de sélection des photos.
@@ -44,16 +45,20 @@ export function PhotoSelector() {
     }
 
     // Concurrence bornée : chaque `fileToPhoto` décode un bitmap complet
-    // (~140 Mo transitoires pour une photo 12 Mpx) — un `Promise.all` non
-    // borné sur un gros lot saturerait la RAM de la WebView mobile.
+    // (~50 Mo transitoires pour une photo 12 Mpx en RGBA) — un `Promise.all`
+    // non borné sur un gros lot pourrait saturer la RAM d'une WebView mobile.
     const results = await mapWithConcurrency(accepted, 4, (f) => fileToPhoto(f));
-    const ok = results.filter((p): p is NonNullable<typeof p> => p !== null);
-    const failed = results.length - ok.length;
+    const ok: PhotoType[] = [];
+    const failures: { name: string; reason: string }[] = [];
+    for (const r of results) {
+      if (r.ok) ok.push(r.photo);
+      else failures.push({ name: r.name, reason: r.reason });
+    }
 
     if (ok.length > 0) addPhotos(ok);
-    if (failed > 0) {
-      const firstFailure = accepted[results.indexOf(null)];
-      toast.error(t.errors.fileTypeUnsupported(firstFailure?.name ?? "?"));
+    if (failures.length > 0) {
+      const first = failures[0];
+      toast.error(t.errors.importFailed(first.name, first.reason));
     }
 
     // Reset l'input pour pouvoir re-sélectionner les mêmes fichiers

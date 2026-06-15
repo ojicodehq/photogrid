@@ -12,16 +12,29 @@ import type { PhotoType } from "@/types";
 export const MAX_PHOTOS = 80;
 
 /**
+ * Résultat d'un import : succès porteur de la `PhotoType`, ou échec
+ * porteur du nom du fichier et de la raison technique réelle.
+ *
+ * On renvoie la raison (et non un simple `null`) pour pouvoir l'afficher
+ * à l'utilisateur : sur mobile il n'y a pas de console, et un message
+ * générique « format non supporté » masque la vraie cause (décodage,
+ * mémoire, picker WebView…) et nous prive de tout diagnostic terrain.
+ */
+export type PhotoImportResult =
+  | { ok: true; photo: PhotoType }
+  | { ok: false; name: string; reason: string };
+
+/**
  * Convertit un `File` en `PhotoType` :
  * - lit l'EXIF pour récupérer l'orientation source
  * - prépare l'image (réduction au cap si la photo est sur-résolue, cf.
  *   `prepareImage`) et crée une blob URL sur le `Blob` retenu
  * - attribue un `id` stable (clé de persistance IndexedDB)
  *
- * En cas d'échec de décodage (format non supporté), retourne `null` :
- * le caller affiche un toast d'erreur et ignore le fichier.
+ * Ne `throw` jamais (sinon `mapWithConcurrency` ferait échouer tout le
+ * lot) : en cas d'échec, renvoie `{ ok: false, reason }` avec le détail.
  */
-export async function fileToPhoto(file: File): Promise<PhotoType | null> {
+export async function fileToPhoto(file: File): Promise<PhotoImportResult> {
   try {
     // EXIF : on n'a besoin que de Orientation. exifr accepte un File.
     // Import dynamique : exifr (~270 Ko) ne charge qu'au premier import de
@@ -71,17 +84,27 @@ export async function fileToPhoto(file: File): Promise<PhotoType | null> {
     }
 
     return {
-      id: crypto.randomUUID(),
-      uri: URL.createObjectURL(blob),
-      width,
-      height,
-      name: file.name,
-      type,
-      size,
-      exifOrientation,
+      ok: true,
+      photo: {
+        id: crypto.randomUUID(),
+        uri: URL.createObjectURL(blob),
+        width,
+        height,
+        name: file.name,
+        type,
+        size,
+        exifOrientation,
+      },
     };
-  } catch {
-    return null;
+  } catch (err) {
+    // Raison technique réelle (nom + message de l'erreur, ou valeur brute) :
+    // affichée temporairement à l'utilisateur pour diagnostiquer les échecs
+    // d'import sur les appareils où nous n'avons pas de console.
+    const reason =
+      err instanceof Error
+        ? `${err.name}: ${err.message}`
+        : String(err);
+    return { ok: false, name: file.name, reason };
   }
 }
 

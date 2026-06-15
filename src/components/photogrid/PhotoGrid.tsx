@@ -1,4 +1,4 @@
-import { type CSSProperties } from "react";
+import { memo, type CSSProperties } from "react";
 
 import { getPaperDimensionsMm } from "@/lib/paperSizes";
 import type { FitMode, LayoutConfig, PhotoType } from "@/types";
@@ -107,30 +107,50 @@ function PhotoPage({
           height: "100%",
         }}
       >
-        {Array.from({ length: layout.rows * layout.columns }, (_, i) => {
-          const photo = photos[i];
-          return (
-            <div
-              key={i}
-              className="overflow-hidden rounded-[1mm]"
-              style={{ background: "var(--cell)" }}
-            >
-              {photo ? (
-                <img
-                  src={photo.uri}
-                  alt={photo.name ?? `photo ${i + 1}`}
-                  className="size-full"
-                  style={{
-                    objectFit: FIT_MAP[layout.fitMode],
-                    imageOrientation: "from-image",
-                  }}
-                  decoding="async"
-                />
-              ) : null}
-            </div>
-          );
-        })}
+        {Array.from({ length: layout.rows * layout.columns }, (_, i) => (
+          <Cell key={i} photo={photos[i]} fitMode={layout.fitMode} index={i} />
+        ))}
       </div>
     </section>
   );
 }
+
+/**
+ * Cellule de la grille, mémoïsée sur `(photo, fitMode)`.
+ *
+ * Les sliders d'espacement, de marges, de format ou d'orientation ne
+ * modifient que le conteneur grid (taille du papier, `gap`, `padding`),
+ * pas le contenu des cellules : sans `memo`, bouger l'un d'eux re-rendrait
+ * inutilement les dizaines de `<img>` à chaque tick. La référence `photo`
+ * reste stable tant que la photo ne change pas (les éléments du store ne
+ * sont pas recréés par un `slice`), donc la comparaison superficielle suffit.
+ */
+const Cell = memo(function Cell({
+  photo,
+  fitMode,
+  index,
+}: {
+  photo: PhotoType | undefined;
+  fitMode: FitMode;
+  index: number;
+}) {
+  return (
+    <div
+      className="overflow-hidden rounded-[1mm]"
+      style={{ background: "var(--cell)" }}
+    >
+      {photo ? (
+        <img
+          src={photo.uri}
+          alt={photo.name ?? `photo ${index + 1}`}
+          className="size-full"
+          style={{
+            objectFit: FIT_MAP[fitMode],
+            imageOrientation: "from-image",
+          }}
+          decoding="async"
+        />
+      ) : null}
+    </div>
+  );
+});
