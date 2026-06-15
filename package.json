@@ -13,7 +13,8 @@
     "publish:apk": "bash scripts/publish-apk.sh",
     "release:apk": "node scripts/bump-version.mjs && npm run publish:apk",
     "publish:bundle": "bash scripts/publish-bundle.sh",
-    "release:ota": "node scripts/bump-version.mjs --web-only && npm run publish:bundle"
+    "release:ota": "node scripts/bump-version.mjs --web-only && npm run publish:bundle",
+    "release": "bash scripts/release.sh"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
