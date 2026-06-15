@@ -4,12 +4,14 @@ import type { PhotoType } from "@/types";
 /**
  * Limite douce sur le nombre de photos chargées simultanément.
  *
- * Chaque photo crée une blob URL qui maintient l'image en RAM côté
- * navigateur. Sur mobile, dépasser cette limite peut faire crasher
- * l'onglet (notamment iOS Safari, plus restrictif). Au-delà, on
- * affiche un toast d'avertissement et on refuse les nouveaux fichiers.
+ * Calée sur le plafond du Photo Picker Android (100, cf.
+ * `getPickImagesMaxLimit`) : au-delà, le sélecteur système ne renvoie de
+ * toute façon pas plus de fichiers en une seule sélection. Chaque photo
+ * conserve une blob URL (image compressée) en RAM ; 100 reste sûr sur les
+ * WebView et navigateurs mobiles récents. Au-delà, on affiche un toast et
+ * on refuse les nouveaux fichiers (l'utilisateur peut ajouter par lots).
  */
-export const MAX_PHOTOS = 80;
+export const MAX_PHOTOS = 100;
 
 /**
  * Résultat d'un import : succès porteur de la `PhotoType`, ou échec

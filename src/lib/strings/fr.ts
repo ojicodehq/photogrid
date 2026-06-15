@@ -122,6 +122,10 @@ export const fr = {
         : n === 1
           ? "1 emplacement libre"
           : `${n} emplacements libres`,
+    importing: (done: number, total: number) =>
+      `Importation… ${done}/${total}`,
+    imported: (n: number) =>
+      n === 1 ? "1 photo ajoutée" : `${n} photos ajoutées`,
   },
   preview: {
     title: "Prévisualisation",

@@ -1,5 +1,5 @@
-import { ImagePlus, X } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { ImagePlus, Loader2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,11 @@ export function PhotoSelector() {
   const addPhotos = usePhotoGridStore((s) => s.addPhotos);
   const removePhoto = usePhotoGridStore((s) => s.removePhoto);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+  // Garde synchrone contre la ré-entrance : `importing` (state) ne devient
+  // `true` qu'au prochain render, trop tard pour bloquer un double-clic
+  // rapide qui relancerait un import concurrent.
+  const importingRef = useRef(false);
 
   // Avertir le navigateur de libérer les blob URLs si l'onglet se ferme.
   useEffect(() => {
@@ -33,6 +38,7 @@ export function PhotoSelector() {
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
+    if (importingRef.current) return; // import déjà en cours
 
     const remaining = MAX_PHOTOS - photos.length;
     if (remaining <= 0) {
@@ -44,25 +50,52 @@ export function PhotoSelector() {
       toast.warning(t.errors.tooManyPhotos(MAX_PHOTOS));
     }
 
-    // Concurrence bornée : chaque `fileToPhoto` décode un bitmap complet
-    // (~50 Mo transitoires pour une photo 12 Mpx en RGBA) : un `Promise.all`
-    // non borné sur un gros lot pourrait saturer la RAM d'une WebView mobile.
-    const results = await mapWithConcurrency(accepted, 4, (f) => fileToPhoto(f));
-    const ok: PhotoType[] = [];
-    const failures: { name: string; reason: string }[] = [];
-    for (const r of results) {
-      if (r.ok) ok.push(r.photo);
-      else failures.push({ name: r.name, reason: r.reason });
-    }
+    const total = accepted.length;
+    importingRef.current = true;
+    setImporting(true);
+    // Toast de progression : le décodage + redimensionnement d'un gros lot
+    // prend plusieurs secondes ; on tient l'utilisateur informé (« X/N »).
+    const toastId = toast.loading(t.home.importing(0, total));
+    try {
+      // Concurrence bornée : chaque `fileToPhoto` décode un bitmap complet
+      // (~50 Mo transitoires pour une photo 12 Mpx en RGBA) : un `Promise.all`
+      // non borné sur un gros lot pourrait saturer la RAM d'une WebView mobile.
+      const results = await mapWithConcurrency(
+        accepted,
+        4,
+        (f) => fileToPhoto(f),
+        (completed) =>
+          toast.loading(t.home.importing(completed, total), { id: toastId }),
+      );
+      const ok: PhotoType[] = [];
+      const failures: { name: string; reason: string }[] = [];
+      for (const r of results) {
+        if (r.ok) ok.push(r.photo);
+        else failures.push({ name: r.name, reason: r.reason });
+      }
 
-    if (ok.length > 0) addPhotos(ok);
-    if (failures.length > 0) {
-      const first = failures[0];
-      toast.error(t.errors.importFailed(first.name, first.reason));
+      if (ok.length > 0) {
+        addPhotos(ok);
+        toast.success(t.home.imported(ok.length), { id: toastId });
+      } else {
+        toast.dismiss(toastId);
+      }
+      if (failures.length > 0) {
+        const first = failures[0];
+        toast.error(t.errors.importFailed(first.name, first.reason));
+      }
+    } catch (err) {
+      // Chemin inattendu (le décodage par photo est déjà catché dans
+      // `fileToPhoto`) : on finalise quand même le toast loading en erreur
+      // pour ne pas le laisser tourner indéfiniment.
+      const reason = err instanceof Error ? err.message : String(err);
+      toast.error(t.errors.importFailed("?", reason), { id: toastId });
+    } finally {
+      importingRef.current = false;
+      setImporting(false);
+      // Reset l'input pour pouvoir re-sélectionner les mêmes fichiers
+      if (inputRef.current) inputRef.current.value = "";
     }
-
-    // Reset l'input pour pouvoir re-sélectionner les mêmes fichiers
-    if (inputRef.current) inputRef.current.value = "";
   };
 
   if (photos.length === 0) {
@@ -78,8 +111,13 @@ export function PhotoSelector() {
         </p>
         <Button
           onClick={() => inputRef.current?.click()}
+          disabled={importing}
+          aria-busy={importing}
           className="mt-6 h-11 rounded-2xl px-6 text-[15px] font-semibold"
         >
+          {importing ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : null}
           {t.home.empty.cta}
         </Button>
         <input
@@ -87,6 +125,7 @@ export function PhotoSelector() {
           type="file"
           accept="image/*"
           multiple
+          disabled={importing}
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
         />
@@ -122,9 +161,15 @@ export function PhotoSelector() {
       <Button
         onClick={() => inputRef.current?.click()}
         variant="secondary"
+        disabled={importing}
+        aria-busy={importing}
         className="h-11 w-full rounded-2xl text-[15px] font-semibold"
       >
-        <ImagePlus className="size-4" />
+        {importing ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : (
+          <ImagePlus className="size-4" />
+        )}
         {t.home.actions.add}
       </Button>
 
@@ -133,6 +178,7 @@ export function PhotoSelector() {
         type="file"
         accept="image/*"
         multiple
+        disabled={importing}
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
       />
