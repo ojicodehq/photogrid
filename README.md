@@ -66,7 +66,12 @@ npm run lint       # ESLint
 npm run build:android   # build web + synchronisation du projet Android
 npm run open:android    # ouvre le projet dans Android Studio
 npm run release:apk     # build un APK release signé (signature à configurer dans android/)
+npm run release:ota     # pousse un correctif web aux APK installés (live-update)
 ```
+
+Les scripts de publication lisent l'hôte et le dossier SSH de destination
+depuis `.env.local`. Copiez `.env.example` en `.env.local` et renseignez vos
+valeurs avant la première release (ce fichier reste local, il n'est pas versionné).
 
 ## Déploiement
 

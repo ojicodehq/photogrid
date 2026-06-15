@@ -45,7 +45,7 @@ export function PhotoSelector() {
     }
 
     // Concurrence bornée : chaque `fileToPhoto` décode un bitmap complet
-    // (~50 Mo transitoires pour une photo 12 Mpx en RGBA) — un `Promise.all`
+    // (~50 Mo transitoires pour une photo 12 Mpx en RGBA) : un `Promise.all`
     // non borné sur un gros lot pourrait saturer la RAM d'une WebView mobile.
     const results = await mapWithConcurrency(accepted, 4, (f) => fileToPhoto(f));
     const ok: PhotoType[] = [];
