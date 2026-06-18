@@ -145,6 +145,8 @@ export function PhotoSelector() {
               src={p.uri}
               alt={p.name ?? `photo ${i + 1}`}
               className="size-full object-cover"
+              loading="lazy"
+              decoding="async"
               style={{ imageOrientation: "from-image" }}
             />
             <button
