@@ -36,25 +36,22 @@ const MM_TO_PT = 72 / 25.4;
 const TARGET_DPI = 300;
 
 /**
- * Sur-échantillonnage du cap par cellule, au-dessus de `TARGET_DPI`, choisi
- * selon le mode d'ajustement (cf. `oversampleFor`). N'affecte QUE les
- * grilles : un 1×1 pleine page reste plafonné à `MAX_EDGE` (~300 PPI sur A4)
- * quelle que soit cette valeur.
+ * Sur-échantillonnage du cap par cellule, au-dessus de `TARGET_DPI`. 1.5 →
+ * les cellules d'une grille sortent à ~450 PPI.
  *
- * - `contain` → 1.0 : l'image tient DANS la cellule, jamais agrandie. La
- *   plafonner à la taille cellule × 300 PPI donne donc déjà ≥ 300 PPI (le
- *   standard tirage) : aucune marge nécessaire, fichier minimal.
- * - `cover` / `fill` → 1.5 : l'image déborde puis est rognée (`cover`) ou
- *   est étirée (`fill`), donc tirée plus grand que ses pixels sur au moins
- *   un axe. La marge (~450 PPI) garantit que la zone visible reste ≥ 300 PPI
- *   malgré l'agrandissement, au prix d'un fichier un peu plus lourd.
+ * Pourquoi 450 et pas 300 (le standard tirage) : à distance normale sur
+ * papier, 300 et 450 sont indiscernables. Mais le PDF est aussi consulté et
+ * **zoomé à l'écran** — le zoom dépasse l'hypothèse « page imprimée vue à
+ * bras tendu » et rend visibles les pixels supplémentaires du 450. Testé sur
+ * device : à 300 PPI le zoom révèle un rendu plus mou qu'à 450, pour un gain
+ * de poids (~8 Mo sur 100 photos) qui ne vaut pas cette perte. On garde donc
+ * 450 partout, qualité JPEG 0.95. Au-delà (×2 = ~600 PPI), on ne fait que
+ * regrossir le fichier (36 Mo mesurés) sans bénéfice notable même au zoom.
+ *
+ * N'affecte QUE les grilles : un 1×1 pleine page reste plafonné à `MAX_EDGE`
+ * (~300 PPI sur A4) quelle que soit cette valeur.
  */
-const OVERSAMPLE_CONTAIN = 1;
-const OVERSAMPLE_SCALED = 1.5;
-
-function oversampleFor(fitMode: FitMode): number {
-  return fitMode === "contain" ? OVERSAMPLE_CONTAIN : OVERSAMPLE_SCALED;
-}
+const CELL_OVERSAMPLE = 1.5;
 
 /**
  * Orientation EXIF (1–8) → rotation (degrés, sens anti-horaire, convention
@@ -188,10 +185,7 @@ export async function generatePdf(
   // ce qui empêche le worker d'épuiser sa mémoire sur les gros lots.
   const cellMaxEdgePt = Math.max(cellW, cellH);
   const cellMaxEdgePx = (cellMaxEdgePt / MM_TO_PT / 25.4) * TARGET_DPI;
-  const maxEdgePx = Math.min(
-    MAX_EDGE,
-    Math.ceil(cellMaxEdgePx * oversampleFor(fitMode)),
-  );
+  const maxEdgePx = Math.min(MAX_EDGE, Math.ceil(cellMaxEdgePx * CELL_OVERSAMPLE));
 
   for (let p = 0; p < totalPages; p++) {
     const page = pdf.addPage([pageW, pageH]);
