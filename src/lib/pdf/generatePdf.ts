@@ -11,6 +11,7 @@ import {
   pushGraphicsState,
 } from "pdf-lib";
 
+import { MAX_EDGE } from "@/lib/imageDownscale";
 import { getPaperDimensionsMm } from "@/lib/paperSizes";
 import { type EmbeddedPhoto, embedPhoto } from "@/lib/pdf/embedImage";
 import type { FitMode, LayoutConfig, PhotoType } from "@/types";
@@ -27,6 +28,19 @@ import type { FitMode, LayoutConfig, PhotoType } from "@/types";
 
 /** 1 mm = 72/25.4 points PostScript. */
 const MM_TO_PT = 72 / 25.4;
+
+/**
+ * Résolution d'impression visée. Au-delà de ~300 PPI l'imprimante grand
+ * public ne restitue plus de détail : c'est le plafond utile.
+ */
+const TARGET_DPI = 300;
+
+/**
+ * Marge de sur-échantillonnage appliquée au cap par cellule. Couvre le mode
+ * `cover` (l'image déborde la cellule avant rognage, donc tirée plus grand
+ * que la cellule) et garde une réserve de netteté au ré-échantillonnage.
+ */
+const CELL_OVERSAMPLE = 2;
 
 /**
  * Orientation EXIF (1–8) → rotation (degrés, sens anti-horaire, convention
@@ -153,6 +167,15 @@ export async function generatePdf(
   const cellW = (contentW - (columns - 1) * gap) / columns;
   const cellH = (contentH - (rows - 1) * gap) / rows;
 
+  // Cap pixel par cellule : on n'embarque jamais plus de pixels que la
+  // cellule ne peut imprimer à `TARGET_DPI`. Adaptatif à la densité de
+  // grille — un 1×1 pleine page garde ~3500 px (cap source `MAX_EDGE`,
+  // donc passe-through sans recompression), un 5×5 tombe à ~1200 px. C'est
+  // ce qui empêche le worker d'épuiser sa mémoire sur les gros lots.
+  const cellMaxEdgePt = Math.max(cellW, cellH);
+  const cellMaxEdgePx = (cellMaxEdgePt / MM_TO_PT / 25.4) * TARGET_DPI;
+  const maxEdgePx = Math.min(MAX_EDGE, Math.ceil(cellMaxEdgePx * CELL_OVERSAMPLE));
+
   for (let p = 0; p < totalPages; p++) {
     const page = pdf.addPage([pageW, pageH]);
     const pagePhotos = photos.slice(p * perPage, p * perPage + perPage);
@@ -166,7 +189,7 @@ export async function generatePdf(
       const cellY = cellTop - cellH;
 
       try {
-        const embedded = await embedPhoto(pdf, pagePhotos[i]);
+        const embedded = await embedPhoto(pdf, pagePhotos[i], maxEdgePx);
         drawPhotoInCell(page, embedded, fitMode, cellX, cellY, cellW, cellH);
       } catch (err) {
         // Une photo illisible (blob URL révoquée, fichier corrompu) ne doit

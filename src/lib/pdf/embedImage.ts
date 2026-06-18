@@ -116,14 +116,94 @@ async function transcodeToPng(uri: string): Promise<Uint8Array> {
 }
 
 /**
+ * Réduit `blob` pour que son grand côté ne dépasse pas `maxEdgePx`, puis
+ * renvoie ses octets ré-encodés. Utilisé pour caler chaque photo sur la
+ * résolution réellement imprimable de sa cellule (cf. `generatePdf`) :
+ * embarquer une image de 3500 px dans une cellule qui n'imprime que ~600 px
+ * gaspille la mémoire du worker (octets retenus par pdf-lib jusqu'au
+ * `save()`) sans aucun gain visible sur le papier — au-delà de quelques
+ * dizaines de photos HD, le worker épuise son tas et les embarquements
+ * suivants échouent silencieusement (pages vierges).
+ *
+ * `imageOrientation: "from-image"` : on « cuit » l'orientation EXIF dans
+ * les pixels — exactement comme `prepareImage` à l'import. L'image scalée
+ * repart donc droite et l'appelant l'embarque avec `exifOrientation: 1` (pas
+ * de rotation au dessin) : aucun risque de double rotation, et aucune
+ * dépendance nouvelle vis-à-vis de la WebView au-delà de ce que l'import
+ * exige déjà. `wantsPng` préserve la transparence (PNG en entrée).
+ * Renvoie `null` si l'image est déjà sous le cap (rien à recompresser).
+ */
+async function scaleBlobToMaxEdge(
+  blob: Blob,
+  maxEdgePx: number,
+  wantsPng: boolean,
+): Promise<Uint8Array | null> {
+  const bitmap = await createImageBitmap(blob, {
+    imageOrientation: "from-image",
+  });
+  const longEdge = Math.max(bitmap.width, bitmap.height);
+  if (longEdge <= maxEdgePx) {
+    bitmap.close();
+    return null;
+  }
+
+  const scale = maxEdgePx / longEdge;
+  const w = Math.max(1, Math.round(bitmap.width * scale));
+  const h = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = new OffscreenCanvas(w, h);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    bitmap.close();
+    return null; // pas de contexte 2D → on retombe sur les octets bruts
+  }
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(bitmap, 0, 0, w, h);
+  bitmap.close();
+
+  // PNG conservé pour ne pas perdre la transparence ; sinon JPEG q0.95
+  // (artefacts imperceptibles à la résolution d'une cellule, même sur un
+  // JPEG déjà compressé une fois).
+  const out = wantsPng
+    ? await canvas.convertToBlob({ type: "image/png" })
+    : await canvas.convertToBlob({ type: "image/jpeg", quality: 0.95 });
+  return new Uint8Array(await out.arrayBuffer());
+}
+
+/**
  * Embarque une photo dans `pdf` et renvoie l'image PDF + son orientation
- * EXIF. Tente l'embarquement direct des octets sources ; bascule sur le
- * transcodage canvas uniquement si pdf-lib refuse le fichier.
+ * EXIF.
+ *
+ * `maxEdgePx` (optionnel) borne le grand côté de l'image embarquée à la
+ * résolution utile de sa cellule : au-delà, la photo est réduite via canvas
+ * avant embarquement, ce qui plafonne la mémoire du worker sur les gros
+ * lots. Sous ce cap (ou sans `maxEdgePx`), on embarque les octets sources
+ * tels quels (zéro recompression, métadonnées JPEG retirées pour la
+ * confidentialité), avec repli transcodage canvas si pdf-lib refuse.
  */
 export async function embedPhoto(
   pdf: PDFDocument,
   photo: PhotoType,
+  maxEdgePx?: number,
 ): Promise<EmbeddedPhoto> {
+  // Le grand côté est invariant par rotation EXIF : `photo.width/height`
+  // (dimensions visuelles) suffit à décider sans décoder l'image.
+  const longEdge = Math.max(photo.width, photo.height);
+  if (maxEdgePx && longEdge > maxEdgePx) {
+    const blob = await (await fetch(photo.uri)).blob();
+    // `photo.type` est fiable (renseigné à l'import) ; `blob.type` peut être
+    // vide selon le navigateur quand on fetch une blob URL.
+    const wantsPng = photo.type === "image/png" || blob.type === "image/png";
+    const scaledBytes = await scaleBlobToMaxEdge(blob, maxEdgePx, wantsPng);
+    if (scaledBytes) {
+      const image = wantsPng
+        ? await pdf.embedPng(scaledBytes)
+        : await pdf.embedJpg(scaledBytes);
+      // Orientation déjà cuite dans les pixels → neutre au dessin.
+      return { image, exifOrientation: 1 };
+    }
+  }
+
   const bytes = await fetchBytes(photo.uri);
   const format = detectFormat(bytes);
 
