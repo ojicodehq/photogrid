@@ -2,6 +2,7 @@ import { Suspense, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 
 import { RouteFallback } from "@/components/layout/RouteFallback";
+import { UpdateBanner } from "@/components/layout/UpdateBanner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { notifyAppReady } from "@/lib/liveUpdate";
@@ -33,6 +34,7 @@ export function AppShell() {
 
   return (
     <ThemeProvider>
+      <UpdateBanner />
       <Suspense fallback={<RouteFallback />}>
         <Outlet />
       </Suspense>
