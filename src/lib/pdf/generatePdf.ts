@@ -14,7 +14,7 @@ import {
 import { MAX_EDGE } from "@/lib/imageDownscale";
 import { getPaperDimensionsMm } from "@/lib/paperSizes";
 import { type EmbeddedPhoto, embedPhoto } from "@/lib/pdf/embedImage";
-import type { FitMode, LayoutConfig, PhotoType } from "@/types";
+import type { FitMode, LayoutConfig, PhotoType, QualityLevel } from "@/types";
 
 /**
  * Génération du PDF d'impression.
@@ -36,22 +36,26 @@ const MM_TO_PT = 72 / 25.4;
 const TARGET_DPI = 300;
 
 /**
- * Sur-échantillonnage du cap par cellule, au-dessus de `TARGET_DPI`. 1.5 →
- * les cellules d'une grille sortent à ~450 PPI.
+ * Sur-échantillonnage du cap par cellule, au-dessus de `TARGET_DPI`, selon le
+ * niveau de qualité choisi (`LayoutConfig.quality`). Le facteur multiplie la
+ * résolution 300 PPI de la cellule, donc 1.0 → ~300 PPI, 1.5 → ~450, 2 → ~600.
  *
- * Pourquoi 450 et pas 300 (le standard tirage) : à distance normale sur
- * papier, 300 et 450 sont indiscernables. Mais le PDF est aussi consulté et
- * **zoomé à l'écran** — le zoom dépasse l'hypothèse « page imprimée vue à
- * bras tendu » et rend visibles les pixels supplémentaires du 450. Testé sur
- * device : à 300 PPI le zoom révèle un rendu plus mou qu'à 450, pour un gain
- * de poids (~8 Mo sur 100 photos) qui ne vaut pas cette perte. On garde donc
- * 450 partout, qualité JPEG 0.95. Au-delà (×2 = ~600 PPI), on ne fait que
- * regrossir le fichier (36 Mo mesurés) sans bénéfice notable même au zoom.
+ * Compromis poids ↔ netteté **au zoom** (mesuré sur device, 100 photos) :
+ * sur un tirage papier à distance normale 300 et 450 sont indiscernables,
+ * mais le PDF est aussi zoomé à l'écran, où les pixels en plus deviennent
+ * visibles. D'où le défaut « high » (450 PPI), bon équilibre.
+ * - standard : ~300 PPI, ~10-13 Mo — tirage, fichier léger
+ * - high : ~450 PPI, ~22 Mo — net au zoom (défaut)
+ * - max : ~600 PPI, ~36 Mo — détail maximal
  *
  * N'affecte QUE les grilles : un 1×1 pleine page reste plafonné à `MAX_EDGE`
- * (~300 PPI sur A4) quelle que soit cette valeur.
+ * (~300 PPI sur A4) quel que soit le niveau.
  */
-const CELL_OVERSAMPLE = 1.5;
+const QUALITY_OVERSAMPLE: Record<QualityLevel, number> = {
+  standard: 1,
+  high: 1.5,
+  max: 2,
+};
 
 /**
  * Orientation EXIF (1–8) → rotation (degrés, sens anti-horaire, convention
@@ -168,7 +172,7 @@ export async function generatePdf(
   const pageW = paper.width * MM_TO_PT;
   const pageH = paper.height * MM_TO_PT;
 
-  const { columns, rows, margins, spacing, fitMode } = layout;
+  const { columns, rows, margins, spacing, fitMode, quality } = layout;
   const perPage = Math.max(1, rows * columns);
   const totalPages = Math.max(1, Math.ceil(photos.length / perPage));
 
@@ -185,7 +189,10 @@ export async function generatePdf(
   // ce qui empêche le worker d'épuiser sa mémoire sur les gros lots.
   const cellMaxEdgePt = Math.max(cellW, cellH);
   const cellMaxEdgePx = (cellMaxEdgePt / MM_TO_PT / 25.4) * TARGET_DPI;
-  const maxEdgePx = Math.min(MAX_EDGE, Math.ceil(cellMaxEdgePx * CELL_OVERSAMPLE));
+  // `?? QUALITY_OVERSAMPLE.high` : garde-fou si `quality` est absent d'un état
+  // persisté ancien (sinon NaN → image non embarquée → cellule vide).
+  const oversample = QUALITY_OVERSAMPLE[quality] ?? QUALITY_OVERSAMPLE.high;
+  const maxEdgePx = Math.min(MAX_EDGE, Math.ceil(cellMaxEdgePx * oversample));
 
   for (let p = 0; p < totalPages; p++) {
     const page = pdf.addPage([pageW, pageH]);

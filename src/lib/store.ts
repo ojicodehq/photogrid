@@ -25,7 +25,7 @@ const DEFAULT_LAYOUT: LayoutConfig = {
   orientation: "portrait",
   fitMode: "contain",
   margins: { top: 10, right: 10, bottom: 10, left: 10 },
-  quality: "standard",
+  quality: "high", // ~450 PPI : net au zoom, bon équilibre poids/qualité
   totalPhotos: 0,
 };
 
@@ -211,6 +211,26 @@ export const usePhotoGridStore = create<PhotoGridState>()(
     {
       name: "photogrid-storage",
       storage: createJSONStorage(() => localStorage),
+      version: 1,
+      // `quality` n'était pas exposé dans l'UI avant la v1 : un "standard"
+      // persisté est donc l'ancien défaut, pas un choix utilisateur. On le
+      // remonte une seule fois au nouveau défaut "high" (~450 PPI) pour ne pas
+      // dégrader la netteté au zoom après mise à jour. Un "standard" choisi
+      // sciemment après la v1 est conservé (migrate ne re-tourne pas).
+      migrate: (persisted, fromVersion) => {
+        const state = persisted as {
+          layout?: Partial<LayoutConfig>;
+          theme?: PhotoGridState["theme"];
+        };
+        if (
+          fromVersion < 1 &&
+          state.layout &&
+          (state.layout.quality === "standard" || state.layout.quality == null)
+        ) {
+          state.layout = { ...state.layout, quality: "high" };
+        }
+        return state;
+      },
       // `totalPhotos` est dérivé de `photos.length` (session-only), donc
       // omis du persist pour éviter qu'une valeur stale traîne en
       // localStorage après reload. Le merge zustand réinjecte 0 depuis

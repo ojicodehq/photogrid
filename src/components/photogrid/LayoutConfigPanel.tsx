@@ -15,6 +15,7 @@ import type {
   LayoutConfig,
   PageOrientation,
   PageSize,
+  QualityLevel,
 } from "@/types";
 
 const GRID_PRESETS: ReadonlyArray<{ label: string; columns: number; rows: number }> = [
@@ -176,6 +177,38 @@ export function LayoutConfigPanel() {
             {t.config.fitMode.fill}
           </ToggleGroupItem>
         </ToggleGroup>
+
+        <SubLabel className="mt-4">{t.config.quality.label}</SubLabel>
+        <ToggleGroup
+          value={[layout.quality]}
+          onValueChange={(values) => {
+            const v = values[0] as QualityLevel | undefined;
+            if (v) updateLayout({ quality: v });
+          }}
+          className="bg-secondary mt-2 grid h-10 w-full grid-cols-3 rounded-full p-1"
+        >
+          <ToggleGroupItem
+            value="standard"
+            className="rounded-full text-[13px] font-medium data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
+          >
+            {t.config.quality.standard}
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="high"
+            className="rounded-full text-[13px] font-medium data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
+          >
+            {t.config.quality.high}
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="max"
+            className="rounded-full text-[13px] font-medium data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
+          >
+            {t.config.quality.max}
+          </ToggleGroupItem>
+        </ToggleGroup>
+        <p className="text-muted-foreground mt-2 text-[12px]">
+          {t.config.quality.hint}
+        </p>
       </Section>
 
       {/* Section : Marges */}
