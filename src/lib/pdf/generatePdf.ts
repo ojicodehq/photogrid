@@ -36,20 +36,25 @@ const MM_TO_PT = 72 / 25.4;
 const TARGET_DPI = 300;
 
 /**
- * Marge de sur-échantillonnage appliquée au cap par cellule, au-dessus de
- * `TARGET_DPI`. Couvre le mode `cover` (l'image déborde la cellule avant
- * rognage, donc tirée plus grand que la cellule) et garde une réserve de
- * netteté au ré-échantillonnage.
+ * Sur-échantillonnage du cap par cellule, au-dessus de `TARGET_DPI`, choisi
+ * selon le mode d'ajustement (cf. `oversampleFor`). N'affecte QUE les
+ * grilles : un 1×1 pleine page reste plafonné à `MAX_EDGE` (~300 PPI sur A4)
+ * quelle que soit cette valeur.
  *
- * 1.5 → les cellules d'une grille sortent à ~450 PPI : largement au-dessus
- * du standard tirage (300 PPI) ET de l'optimum planche-contact (~240 PPI
- * pour des petites images en grille), avec marge pour le `cover`. Au-delà,
- * on n'ajoute que du poids de fichier et du temps de génération pour du
- * détail que ni l'imprimante (~300 PPI) ni l'œil ne restituent. N'affecte
- * QUE les grilles : un 1×1 pleine page reste plafonné à `MAX_EDGE`
- * (~300 PPI sur A4) quelle que soit cette valeur.
+ * - `contain` → 1.0 : l'image tient DANS la cellule, jamais agrandie. La
+ *   plafonner à la taille cellule × 300 PPI donne donc déjà ≥ 300 PPI (le
+ *   standard tirage) : aucune marge nécessaire, fichier minimal.
+ * - `cover` / `fill` → 1.5 : l'image déborde puis est rognée (`cover`) ou
+ *   est étirée (`fill`), donc tirée plus grand que ses pixels sur au moins
+ *   un axe. La marge (~450 PPI) garantit que la zone visible reste ≥ 300 PPI
+ *   malgré l'agrandissement, au prix d'un fichier un peu plus lourd.
  */
-const CELL_OVERSAMPLE = 1.5;
+const OVERSAMPLE_CONTAIN = 1;
+const OVERSAMPLE_SCALED = 1.5;
+
+function oversampleFor(fitMode: FitMode): number {
+  return fitMode === "contain" ? OVERSAMPLE_CONTAIN : OVERSAMPLE_SCALED;
+}
 
 /**
  * Orientation EXIF (1–8) → rotation (degrés, sens anti-horaire, convention
@@ -183,7 +188,10 @@ export async function generatePdf(
   // ce qui empêche le worker d'épuiser sa mémoire sur les gros lots.
   const cellMaxEdgePt = Math.max(cellW, cellH);
   const cellMaxEdgePx = (cellMaxEdgePt / MM_TO_PT / 25.4) * TARGET_DPI;
-  const maxEdgePx = Math.min(MAX_EDGE, Math.ceil(cellMaxEdgePx * CELL_OVERSAMPLE));
+  const maxEdgePx = Math.min(
+    MAX_EDGE,
+    Math.ceil(cellMaxEdgePx * oversampleFor(fitMode)),
+  );
 
   for (let p = 0; p < totalPages; p++) {
     const page = pdf.addPage([pageW, pageH]);
