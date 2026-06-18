@@ -125,32 +125,41 @@ async function transcodeToPng(uri: string): Promise<Uint8Array> {
  * dizaines de photos HD, le worker épuise son tas et les embarquements
  * suivants échouent silencieusement (pages vierges).
  *
+ * Réduction PENDANT le décodage (`resizeWidth/Height`) : c'est le point
+ * critique mémoire. Sans ça, `createImageBitmap` matérialise d'abord le
+ * bitmap source plein (~49 Mo pour du 3500² en RGBA) avant de le réduire ;
+ * répété sur des dizaines de photos, ce pic transitoire suffit à faire
+ * échouer un embarquement sur un appareil contraint, même si les octets
+ * retenus par pdf-lib restent modestes. Décoder directement à la taille
+ * cible supprime ce pic.
+ *
  * `imageOrientation: "from-image"` : on « cuit » l'orientation EXIF dans
  * les pixels — exactement comme `prepareImage` à l'import. L'image scalée
  * repart donc droite et l'appelant l'embarque avec `exifOrientation: 1` (pas
  * de rotation au dessin) : aucun risque de double rotation, et aucune
  * dépendance nouvelle vis-à-vis de la WebView au-delà de ce que l'import
  * exige déjà. `wantsPng` préserve la transparence (PNG en entrée).
- * Renvoie `null` si l'image est déjà sous le cap (rien à recompresser).
+ *
+ * `targetW/H` sont les dimensions visuelles cibles (calculées par
+ * l'appelant depuis `photo.width/height`). Le canvas est calé sur cette
+ * cible : si la WebView ignore `resizeWidth` (vieux moteur), `drawImage`
+ * réduit quand même au bon format — résultat correct, sans le gain mémoire.
+ * Renvoie `null` si le contexte 2D est indisponible (repli octets bruts).
  */
 async function scaleBlobToMaxEdge(
   blob: Blob,
-  maxEdgePx: number,
+  targetW: number,
+  targetH: number,
   wantsPng: boolean,
 ): Promise<Uint8Array | null> {
   const bitmap = await createImageBitmap(blob, {
     imageOrientation: "from-image",
+    resizeWidth: targetW,
+    resizeHeight: targetH,
+    resizeQuality: "high",
   });
-  const longEdge = Math.max(bitmap.width, bitmap.height);
-  if (longEdge <= maxEdgePx) {
-    bitmap.close();
-    return null;
-  }
 
-  const scale = maxEdgePx / longEdge;
-  const w = Math.max(1, Math.round(bitmap.width * scale));
-  const h = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = new OffscreenCanvas(w, h);
+  const canvas = new OffscreenCanvas(targetW, targetH);
   const ctx = canvas.getContext("2d");
   if (!ctx) {
     bitmap.close();
@@ -158,7 +167,7 @@ async function scaleBlobToMaxEdge(
   }
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(bitmap, 0, 0, w, h);
+  ctx.drawImage(bitmap, 0, 0, targetW, targetH);
   bitmap.close();
 
   // PNG conservé pour ne pas perdre la transparence ; sinon JPEG q0.95
@@ -194,7 +203,12 @@ export async function embedPhoto(
     // `photo.type` est fiable (renseigné à l'import) ; `blob.type` peut être
     // vide selon le navigateur quand on fetch une blob URL.
     const wantsPng = photo.type === "image/png" || blob.type === "image/png";
-    const scaledBytes = await scaleBlobToMaxEdge(blob, maxEdgePx, wantsPng);
+    // Dimensions cibles en espace visuel (le grand côté plafonné à
+    // `maxEdgePx`), pour décoder directement à cette taille.
+    const scale = maxEdgePx / longEdge;
+    const targetW = Math.max(1, Math.round(photo.width * scale));
+    const targetH = Math.max(1, Math.round(photo.height * scale));
+    const scaledBytes = await scaleBlobToMaxEdge(blob, targetW, targetH, wantsPng);
     if (scaledBytes) {
       const image = wantsPng
         ? await pdf.embedPng(scaledBytes)
