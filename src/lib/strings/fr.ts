@@ -12,6 +12,12 @@ export const fr = {
     tagline: "Imprimez vos photos comme un pro",
     by: "par Ojicode",
   },
+  update: {
+    available: "Mise à jour disponible",
+    version: (v: string) => `version ${v}`,
+    restart: "Redémarrer",
+    dismiss: "Ignorer",
+  },
   welcome: {
     titleMain: "Plusieurs photos.",
     titleAccent: "Une seule page.",
