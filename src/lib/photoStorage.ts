@@ -29,6 +29,9 @@ const DB_VERSION = 1;
 export type StoredPhoto = {
   id: string;
   blob: Blob;
+  /** Vignette d'affichage. Absente des enregistrements d'avant cette
+   * version : l'hydratation retombe alors sur le plein-res. */
+  thumbBlob?: Blob;
   order: number;
   width: number;
   height: number;

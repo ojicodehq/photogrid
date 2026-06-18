@@ -142,7 +142,7 @@ export function PhotoSelector() {
             className="bg-cell relative aspect-square overflow-hidden rounded-xl"
           >
             <img
-              src={p.uri}
+              src={p.thumbUri ?? p.uri}
               alt={p.name ?? `photo ${i + 1}`}
               className="size-full object-cover"
               loading="lazy"
