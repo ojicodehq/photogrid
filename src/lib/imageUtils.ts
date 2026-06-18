@@ -52,6 +52,7 @@ export async function fileToPhoto(file: File): Promise<PhotoImportResult> {
     }
 
     let blob: Blob;
+    let thumbBlob: Blob | undefined;
     // Assignés dans les deux branches ci-dessous ; tout échec du fallback
     // relance vers le `catch` externe (→ `null`), jamais lus non initialisés.
     let width!: number;
@@ -63,6 +64,7 @@ export async function fileToPhoto(file: File): Promise<PhotoImportResult> {
     try {
       const prepared = await prepareImage(file, orientation);
       blob = prepared.blob;
+      thumbBlob = prepared.thumbBlob;
       width = prepared.width;
       height = prepared.height;
       exifOrientation = prepared.exifOrientation;
@@ -90,6 +92,9 @@ export async function fileToPhoto(file: File): Promise<PhotoImportResult> {
       photo: {
         id: crypto.randomUUID(),
         uri: URL.createObjectURL(blob),
+        // Pas de vignette (format exotique tombé sur le fallback) →
+        // l'affichage retombe sur le plein-res.
+        thumbUri: thumbBlob ? URL.createObjectURL(thumbBlob) : undefined,
         width,
         height,
         name: file.name,
@@ -139,6 +144,9 @@ export function revokePhotos(photos: PhotoType[]): void {
   for (const p of photos) {
     if (p.uri.startsWith("blob:")) {
       URL.revokeObjectURL(p.uri);
+    }
+    if (p.thumbUri?.startsWith("blob:")) {
+      URL.revokeObjectURL(p.thumbUri);
     }
   }
 }

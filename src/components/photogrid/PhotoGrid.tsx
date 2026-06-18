@@ -141,7 +141,7 @@ const Cell = memo(function Cell({
     >
       {photo ? (
         <img
-          src={photo.uri}
+          src={photo.thumbUri ?? photo.uri}
           alt={photo.name ?? `photo ${index + 1}`}
           className="size-full"
           style={{

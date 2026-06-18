@@ -27,11 +27,58 @@ export const MAX_EDGE = 3500;
 /** Qualité JPEG du seul ré-encodage (élevée : artefacts imperceptibles). */
 const JPEG_QUALITY = 0.92;
 
+/**
+ * Grand côté de la vignette d'affichage. 640 px couvre le pire cas écran
+ * (une photo en 1×1 dans l'aperçu A4 desktop pleine échelle ≈ 790 px de
+ * large, donc quasi net) tout en décodant ~30× moins de pixels que le
+ * plein-res (3500 px) : c'est ce qui rendait le sélecteur et l'aperçu lents
+ * sur gros lots. L'impression, elle, reste en plein-res (cf. `embedImage`).
+ */
+const THUMB_MAX_EDGE = 640;
+
+/** Qualité JPEG de la vignette (affichage seul : on peut serrer fort). */
+const THUMB_QUALITY = 0.72;
+
 /** Métadonnées image produites par `prepareImage`, hors `id`/`uri`. */
 export type PreparedImage = Pick<
   PhotoType,
   "width" | "height" | "name" | "type" | "size" | "exifOrientation"
-> & { blob: Blob };
+> & {
+  blob: Blob;
+  /** Vignette d'affichage (déjà orientée droite), ou `undefined` si échec. */
+  thumbBlob?: Blob;
+};
+
+/**
+ * Rend une vignette JPEG (grand côté ≤ `THUMB_MAX_EDGE`) à partir d'un
+ * bitmap DÉJÀ décodé et orienté (`imageOrientation: "from-image"`) : la
+ * vignette repart donc droite, sans EXIF. Réutilise le décodage de
+ * `prepareImage` : zéro décodage supplémentaire. Renvoie `undefined` en
+ * cas d'échec (l'appelant retombe sur le plein-res pour l'affichage).
+ */
+async function renderThumbnail(
+  bitmap: ImageBitmap,
+  srcW: number,
+  srcH: number,
+): Promise<Blob | undefined> {
+  const scale = Math.min(1, THUMB_MAX_EDGE / Math.max(srcW, srcH));
+  const w = Math.max(1, Math.round(srcW * scale));
+  const h = Math.max(1, Math.round(srcH * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return undefined;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(bitmap, 0, 0, w, h);
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, "image/jpeg", THUMB_QUALITY),
+  );
+  canvas.width = 0;
+  canvas.height = 0;
+  return blob ?? undefined;
+}
 
 /**
  * Réduit `file` si son grand côté dépasse `MAX_EDGE`, sinon le renvoie
@@ -56,6 +103,10 @@ export async function prepareImage(
   const srcH = bitmap.height;
   const longEdge = Math.max(srcW, srcH);
 
+  // Vignette d'affichage, depuis le bitmap encore vivant (réutilise le
+  // décodage). Faite avant tout `bitmap.close()` pour ne pas redécoder.
+  const thumbBlob = await renderThumbnail(bitmap, srcW, srcH);
+
   // Sous le cap : aucune recompression. On garde les octets ET l'EXIF source.
   if (longEdge <= MAX_EDGE) {
     bitmap.close();
@@ -67,6 +118,7 @@ export async function prepareImage(
       type: file.type,
       size: file.size,
       exifOrientation: sourceOrientation,
+      thumbBlob,
     };
   }
 
@@ -89,6 +141,7 @@ export async function prepareImage(
       type: file.type,
       size: file.size,
       exifOrientation: sourceOrientation,
+      thumbBlob,
     };
   }
   ctx.imageSmoothingEnabled = true;
@@ -114,6 +167,7 @@ export async function prepareImage(
       type: file.type,
       size: file.size,
       exifOrientation: sourceOrientation,
+      thumbBlob,
     };
   }
 
@@ -126,5 +180,6 @@ export async function prepareImage(
     size: blob.size,
     // Pixels déjà droits (orientation cuite par le canvas) → EXIF neutre.
     exifOrientation: 1,
+    thumbBlob,
   };
 }

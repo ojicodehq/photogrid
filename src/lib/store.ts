@@ -8,6 +8,7 @@ import {
   getAllStoredPhotos,
   putPhotos,
 } from "@/lib/photoStorage";
+import { revokePhotos } from "@/lib/imageUtils";
 import { mapWithConcurrency } from "@/lib/mapWithConcurrency";
 import { fr } from "@/lib/strings/fr";
 import type {
@@ -76,6 +77,9 @@ async function persistPhotos(newPhotos: PhotoType[]): Promise<void> {
     const items = await mapWithConcurrency(newPhotos, 4, async (p) => ({
       id: p.id,
       blob: await (await fetch(p.uri)).blob(),
+      thumbBlob: p.thumbUri
+        ? await (await fetch(p.thumbUri)).blob()
+        : undefined,
       width: p.width,
       height: p.height,
       name: p.name,
@@ -130,9 +134,7 @@ export const usePhotoGridStore = create<PhotoGridState>()(
         set((state) => {
           const removed = state.photos[index];
           if (removed) {
-            if (removed.uri.startsWith("blob:")) {
-              URL.revokeObjectURL(removed.uri);
-            }
+            revokePhotos([removed]); // libère plein-res + vignette
             void deletePhoto(removed.id);
           }
           const photos = state.photos.filter((_, i) => i !== index);
@@ -145,9 +147,7 @@ export const usePhotoGridStore = create<PhotoGridState>()(
 
       clearPhotos: () =>
         set((state) => {
-          state.photos.forEach((p) => {
-            if (p.uri.startsWith("blob:")) URL.revokeObjectURL(p.uri);
-          });
+          revokePhotos(state.photos); // libère plein-res + vignettes
           void clearStoredPhotos();
           return {
             photos: [],
@@ -166,6 +166,9 @@ export const usePhotoGridStore = create<PhotoGridState>()(
           created = stored.map((s) => ({
             id: s.id,
             uri: URL.createObjectURL(s.blob),
+            // Enregistrements d'avant cette version : pas de vignette →
+            // l'affichage retombe sur le plein-res.
+            thumbUri: s.thumbBlob ? URL.createObjectURL(s.thumbBlob) : undefined,
             width: s.width,
             height: s.height,
             name: s.name,
@@ -180,9 +183,7 @@ export const usePhotoGridStore = create<PhotoGridState>()(
         } catch (err) {
           // Révoque les blob URLs déjà créées avant l'échec : sans le `set`,
           // elles ne seraient référencées nulle part et fuiraient en RAM.
-          created.forEach((p) => {
-            if (p.uri.startsWith("blob:")) URL.revokeObjectURL(p.uri);
-          });
+          revokePhotos(created);
           photosHydrated = false; // autorise une nouvelle tentative
           console.warn("Hydratation des photos depuis IndexedDB échouée", err);
         }

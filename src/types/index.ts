@@ -1,6 +1,7 @@
 export type PhotoType = {
   id: string; // identifiant stable, sert de clé IndexedDB
-  uri: string; // blob URL via URL.createObjectURL
+  uri: string; // blob URL via URL.createObjectURL (plein-res, pour le PDF)
+  thumbUri?: string; // blob URL d'une vignette légère, pour l'affichage écran
   width: number;
   height: number;
   name?: string;
