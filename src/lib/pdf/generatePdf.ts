@@ -36,11 +36,20 @@ const MM_TO_PT = 72 / 25.4;
 const TARGET_DPI = 300;
 
 /**
- * Marge de sur-échantillonnage appliquée au cap par cellule. Couvre le mode
- * `cover` (l'image déborde la cellule avant rognage, donc tirée plus grand
- * que la cellule) et garde une réserve de netteté au ré-échantillonnage.
+ * Marge de sur-échantillonnage appliquée au cap par cellule, au-dessus de
+ * `TARGET_DPI`. Couvre le mode `cover` (l'image déborde la cellule avant
+ * rognage, donc tirée plus grand que la cellule) et garde une réserve de
+ * netteté au ré-échantillonnage.
+ *
+ * 1.5 → les cellules d'une grille sortent à ~450 PPI : largement au-dessus
+ * du standard tirage (300 PPI) ET de l'optimum planche-contact (~240 PPI
+ * pour des petites images en grille), avec marge pour le `cover`. Au-delà,
+ * on n'ajoute que du poids de fichier et du temps de génération pour du
+ * détail que ni l'imprimante (~300 PPI) ni l'œil ne restituent. N'affecte
+ * QUE les grilles : un 1×1 pleine page reste plafonné à `MAX_EDGE`
+ * (~300 PPI sur A4) quelle que soit cette valeur.
  */
-const CELL_OVERSAMPLE = 2;
+const CELL_OVERSAMPLE = 1.5;
 
 /**
  * Orientation EXIF (1–8) → rotation (degrés, sens anti-horaire, convention
