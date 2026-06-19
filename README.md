@@ -1,3 +1,5 @@
+<div align="center">
+
 # PhotoGrid
 
 *Plusieurs photos sur une page, à la taille réelle. Dans le navigateur, sans rien envoyer nulle part.*
@@ -5,6 +7,17 @@
 [![Licence : AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-blue.svg)](./LICENSE)
 [![Application web](https://img.shields.io/badge/web-photogrid.ojicode.fr-C4693D.svg)](https://photogrid.ojicode.fr)
 [![PWA](https://img.shields.io/badge/PWA-installable-5a5a5a.svg)](https://photogrid.ojicode.fr)
+
+</div>
+
+<!--
+  Image de couverture. Pour la remplacer plus tard par une démo animée :
+  déposez le fichier dans public/screenshots/demo.gif et changez la ligne
+  ci-dessous en :  <img src="./public/screenshots/demo.gif" alt="Démo de PhotoGrid" />
+-->
+<a href="https://photogrid.ojicode.fr">
+  <img src="./public/screenshots/desktop.png" alt="Aperçu de PhotoGrid" width="100%" />
+</a>
 
 Vous voulez tirer plusieurs photos sur une même feuille (planche de famille,
 photos d'identité, mosaïque, contact sheet) sans en gâcher la moitié à
@@ -20,12 +33,6 @@ vérifier vous-même.
 
 - Application web : https://photogrid.ojicode.fr
 - Application Android (APK signé) : voir les [Releases](https://github.com/ojicodehq/photogrid/releases)
-
-## Aperçu
-
-![PhotoGrid sur ordinateur](./public/screenshots/desktop.png)
-
-<img src="./public/screenshots/mobile.png" alt="PhotoGrid sur mobile" width="320" />
 
 ## En trois étapes
 
