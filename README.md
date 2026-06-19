@@ -96,7 +96,4 @@ Code source ouvert sous licence **AGPL-3.0** : voir [`LICENSE`](./LICENSE). Vous
 pouvez l'utiliser, le modifier et le redistribuer, à condition de publier les
 sources de toute version déployée (y compris en service web).
 
-Le nom « PhotoGrid », le logo et l'identité visuelle Ojicode ne sont **pas**
-couverts par cette licence : voir [`TRADEMARK.md`](./TRADEMARK.md).
-
 © 2026 Nicodème Cajuste (Ojicode).
