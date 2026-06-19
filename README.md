@@ -18,10 +18,6 @@ caser plusieurs tirages sur une même page sans gâcher de papier.
 - Application web : https://photogrid.ojicode.fr
 - Application Android (APK signé) : voir les [Releases](https://github.com/ojicodehq/photogrid/releases)
 
-> Ce dépôt est public pour rendre le code consultable et vérifiable (notamment la
-> promesse « aucune photo n'est envoyée sur un serveur »). Il n'est pas pensé pour
-> être auto-hébergé : pour utiliser l'app, passez par le lien web ou l'APK ci-dessus.
-
 ## Aperçu
 
 ![PhotoGrid sur ordinateur](./public/screenshots/desktop.png)
