@@ -196,11 +196,11 @@ export const fr = {
       left: "Gauche",
     },
     quality: {
-      label: "Qualité du PDF",
+      label: "Qualité",
       standard: "Standard",
       high: "Haute",
       max: "Maximum",
-      hint: "Plus haut = PDF plus net au zoom, mais plus lourd.",
+      hint: "Plus net à l'impression et au zoom, mais fichier plus lourd.",
     },
     presets: "Préréglages",
   },
