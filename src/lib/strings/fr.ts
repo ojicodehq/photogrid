@@ -94,10 +94,14 @@ export const fr = {
           q: "Est-ce que ça marche sur téléphone ?",
           a: "Oui, l'interface est pensée pour le mobile. Vous pouvez aussi installer PhotoGrid sur l'écran d'accueil pour l'ouvrir comme une vraie application.",
         },
+        {
+          q: "Le code de PhotoGrid est-il ouvert ?",
+          a: "Oui. PhotoGrid est open source, publié sous licence AGPL-3.0. Le code est consultable sur GitHub : vous pouvez vérifier par vous-même qu'aucune photo n'est envoyée sur un serveur.",
+        },
       ],
     },
     footer: {
-      tagline: "Une application Ojicode, 100 % hors-ligne et sans compte.",
+      tagline: "Une application Ojicode open source, 100 % hors-ligne et sans compte.",
       cta: "Composer ma première page",
     },
   },
@@ -238,7 +242,7 @@ export const fr = {
     fileTypeUnsupported: (name: string) =>
       `Format non supporté : ${name}. Préférez JPEG ou PNG.`,
     importFailed: (name: string, reason: string) =>
-      `Impossible d'ajouter ${name} (${reason}). Faites une capture d'écran et envoyez-la nous.`,
+      `Impossible d'ajouter ${name} (${reason}). Faites une capture d'écran et envoyez-la à contact@ojicode.fr.`,
     tooManyPhotos: (max: number) =>
       `Limite atteinte (${max} photos). Supprimez-en avant d'en ajouter d'autres.`,
     printFailed: "L'impression a échoué. Veuillez réessayer.",
