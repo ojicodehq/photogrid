@@ -1,16 +1,19 @@
 # PhotoGrid
 
+*Plusieurs photos sur une page, à la taille réelle. Dans le navigateur, sans rien envoyer nulle part.*
+
 [![Licence : AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-blue.svg)](./LICENSE)
 [![Application web](https://img.shields.io/badge/web-photogrid.ojicode.fr-C4693D.svg)](https://photogrid.ojicode.fr)
 [![PWA](https://img.shields.io/badge/PWA-installable-5a5a5a.svg)](https://photogrid.ojicode.fr)
 
-Imprimez plusieurs photos sur une seule feuille. PhotoGrid compose une grille de
-photos et l'imprime à l'échelle millimétrique exacte, aux formats
-**A4 / A5 / Letter / Legal**. Tout se passe dans le navigateur : aucune photo
-n'est envoyée sur un serveur, et l'application fonctionne hors-ligne.
+Vous voulez tirer plusieurs photos sur une même feuille (planche de famille,
+photos d'identité, mosaïque, contact sheet) sans en gâcher la moitié à
+l'impression ? PhotoGrid pose vos images sur une grille réglable et les sort à
+l'échelle millimétrique exacte, en **A4, A5, Letter ou Legal**.
 
-Pratique pour des planches photo, des mosaïques, des contact sheets, ou pour
-caser plusieurs tirages sur une même page sans gâcher de papier.
+Et vos photos ne bougent pas : tout le traitement se fait dans votre navigateur,
+même hors-ligne. Pas de compte, pas d'upload. Le code est ouvert, vous pouvez le
+vérifier vous-même.
 
 **React 19 + Vite + Tailwind 4 + base-ui.** Application 100 % client, installable
 (PWA), aussi packagée en application Android via Capacitor.
@@ -24,29 +27,33 @@ caser plusieurs tirages sur une même page sans gâcher de papier.
 
 <img src="./public/screenshots/mobile.png" alt="PhotoGrid sur mobile" width="320" />
 
-## Fonctionnement
+## En trois étapes
 
 1. Ajoutez vos photos.
-2. Choisissez le format de page (A4, A5, Letter, Legal) et l'orientation.
-3. Réglez la grille : colonnes, lignes, marges, espacement.
-4. Imprimez ou exportez en PDF, au format millimétrique exact.
+2. Choisissez le format (A4, A5, Letter, Legal), l'orientation et la grille :
+   colonnes, lignes, marges, espacement.
+3. Imprimez ou exportez en PDF, au millimètre près.
+
+Ce que vous voyez à l'écran correspond exactement à ce qui sort de l'imprimante,
+sans mise à l'échelle surprise.
 
 ## Sous le capot
 
-- **Aucun backend.** L'import, le redimensionnement, la composition et la
-  génération du PDF se font entièrement dans le navigateur. Les images ne quittent
-  pas l'appareil.
-- **Rendu à l'échelle physique.** La mise en page est calculée en millimètres :
-  ce qui s'affiche correspond aux dimensions réelles du format choisi, sans mise à
-  l'échelle surprise de l'imprimante.
-- **PDF hors du thread principal.** La génération tourne dans un Web Worker pour
-  ne pas figer l'interface sur les gros lots d'images.
-- **Hors-ligne et installable.** Service worker géré par Serwist, stockage local
-  des photos via IndexedDB.
-- **Android.** La même base web est empaquetée avec Capacitor et reçoit des mises
-  à jour live (OTA) chiffrées de bout en bout.
+Tout l'intérêt est de faire ça **sans serveur**. Voici comment ça tient côté
+code :
 
-Quelques points d'entrée pour lire le code :
+- **Zéro upload.** Import, redimensionnement, composition et génération du PDF
+  tournent dans le navigateur. Les images ne quittent jamais l'appareil.
+- **Échelle physique.** La mise en page est calculée en millimètres, pas en
+  pixels : le rendu colle aux dimensions réelles du format choisi.
+- **PDF hors du thread principal.** La génération s'exécute dans un Web Worker,
+  donc l'interface ne fige pas sur un gros lot d'images.
+- **Hors-ligne et installable.** Service worker géré par Serwist, photos
+  persistées en local via IndexedDB.
+- **Android.** La même base web est empaquetée avec Capacitor et reçoit des
+  correctifs à chaud (OTA) chiffrés de bout en bout.
+
+Par où commencer la lecture :
 
 - `src/lib/pdf/` : génération du PDF dans un Web Worker.
 - `src/lib/printService.ts` : impression navigateur à l'échelle exacte.
@@ -54,7 +61,7 @@ Quelques points d'entrée pour lire le code :
 - `src/components/photogrid/` : composition et aperçu de la grille.
 - `src/lib/strings/fr.ts` : tous les textes de l'interface, centralisés.
 
-## Explorer le code en local
+## Lancer le projet en local
 
 Node.js >= 20.
 
