@@ -77,7 +77,7 @@ npm run release         # release mobile complète : OTA puis APK, même version
 `npm run release` enchaîne `release:ota` puis `release:apk` pour publier les
 deux canaux sur le même numéro de version. Il ne touche pas à git : il affiche
 en fin de course la commande de commit du bump à lancer. Le site web (PWA), lui,
-se déploie automatiquement via GitHub Actions au push sur `main`.
+est déployé automatiquement à partir de la branche `main`.
 
 Les scripts de publication lisent l'hôte et le dossier SSH de destination
 depuis `.env.local`. Copiez `.env.example` en `.env.local` et renseignez vos
