@@ -1,5 +1,9 @@
 # PhotoGrid
 
+[![Licence : AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-blue.svg)](./LICENSE)
+[![Application web](https://img.shields.io/badge/web-photogrid.ojicode.fr-C4693D.svg)](https://photogrid.ojicode.fr)
+[![PWA](https://img.shields.io/badge/PWA-installable-5a5a5a.svg)](https://photogrid.ojicode.fr)
+
 Imprimez plusieurs photos sur une seule feuille. PhotoGrid compose une grille de
 photos et l'imprime à l'échelle millimétrique exacte, aux formats
 **A4 / A5 / Letter / Legal**. Tout se passe dans le navigateur : aucune photo
@@ -17,6 +21,8 @@ caser plusieurs tirages sur une même page sans gâcher de papier.
 ## Aperçu
 
 ![PhotoGrid sur ordinateur](./public/screenshots/desktop.png)
+
+<img src="./public/screenshots/mobile.png" alt="PhotoGrid sur mobile" width="320" />
 
 ## Installation
 
