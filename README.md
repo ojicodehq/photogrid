@@ -1,5 +1,9 @@
 # PhotoGrid
 
+[![Licence : AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-blue.svg)](./LICENSE)
+[![Application web](https://img.shields.io/badge/web-photogrid.ojicode.fr-C4693D.svg)](https://photogrid.ojicode.fr)
+[![PWA](https://img.shields.io/badge/PWA-installable-5a5a5a.svg)](https://photogrid.ojicode.fr)
+
 Imprimez plusieurs photos sur une seule feuille. PhotoGrid compose une grille de
 photos et l'imprime à l'échelle millimétrique exacte, aux formats
 **A4 / A5 / Letter / Legal**. Tout se passe dans le navigateur : aucune photo
@@ -18,7 +22,7 @@ caser plusieurs tirages sur une même page sans gâcher de papier.
 
 ![PhotoGrid sur ordinateur](./public/screenshots/desktop.png)
 
-
+<img src="./public/screenshots/mobile.png" alt="PhotoGrid sur mobile" width="320" />
 
 ## Installation
 
@@ -88,4 +92,11 @@ et `docker-compose.yml`. Le `docker-compose.yml` lit la variable `PUBLIC_DOMAIN`
 
 ## Licence
 
-Tous droits réservés. Voir [`LICENSE`](./LICENSE).
+Code source ouvert sous licence **AGPL-3.0** : voir [`LICENSE`](./LICENSE). Vous
+pouvez l'utiliser, le modifier et le redistribuer, à condition de publier les
+sources de toute version déployée (y compris en service web).
+
+Le nom « PhotoGrid », le logo et l'identité visuelle Ojicode ne sont **pas**
+couverts par cette licence : voir [`TRADEMARK.md`](./TRADEMARK.md).
+
+© 2026 Nicodème Cajuste (Ojicode).

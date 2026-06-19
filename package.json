@@ -1,7 +1,9 @@
 {
   "name": "photogrid-web",
-  "version": "0.1.17",
+  "version": "0.1.19",
   "private": true,
+  "license": "AGPL-3.0-only",
+  "author": "Nicodème Cajuste (Ojicode)",
   "type": "module",
   "scripts": {
     "dev": "vite",
