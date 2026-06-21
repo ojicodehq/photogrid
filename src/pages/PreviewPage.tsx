@@ -22,6 +22,7 @@ const DESKTOP_ASIDE_W = 340;
 export default function PreviewPage() {
   const photos = usePhotoGridStore((s) => s.photos);
   const layout = usePhotoGridStore((s) => s.layout);
+  const markExportSuccess = usePhotoGridStore((s) => s.markExportSuccess);
   const {
     currentPage,
     totalPages,
@@ -71,6 +72,8 @@ export default function PreviewPage() {
       // qu'au premier clic, pas avec le chunk de la page.
       const { printDocument } = await import("@/lib/printService");
       await printDocument(photos, layout);
+      // Export réussi : signal pour une éventuelle relance du prompt d'install.
+      markExportSuccess();
     } catch {
       toast.error(t.errors.printFailed);
     } finally {
