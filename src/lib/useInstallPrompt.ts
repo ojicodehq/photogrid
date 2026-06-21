@@ -44,12 +44,15 @@ export function useInstallPrompt() {
     };
   }, []);
 
-  const promptInstall = async () => {
-    if (!event) return;
+  const promptInstall = async (): Promise<
+    "accepted" | "dismissed" | "unavailable"
+  > => {
+    if (!event) return "unavailable";
     await event.prompt();
     const result = await event.userChoice;
     if (result.outcome === "accepted") setInstalled(true);
     setEvent(null);
+    return result.outcome;
   };
 
   return {

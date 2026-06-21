@@ -36,6 +36,12 @@ type PhotoGridState = {
   /** Session-only : non persisté */
   photos: PhotoType[];
   currentPage: number;
+  /**
+   * Horodatage du dernier export PDF réussi (session-only). Sert de signal
+   * inter-routes au prompt d'installation : `PreviewPage` le pose, le sheet
+   * monté dans `AppShell` le lit pour décider d'une relance.
+   */
+  lastExportAt: number | null;
 
   // Actions photos
   addPhotos: (photos: PhotoType[]) => void;
@@ -53,6 +59,10 @@ type PhotoGridState = {
 
   // Actions pagination
   setCurrentPage: (page: number) => boolean;
+
+  // Signal export
+  /** Marque un export PDF réussi (déclencheur de relance du prompt d'install). */
+  markExportSuccess: () => void;
 };
 
 /**
@@ -116,6 +126,7 @@ export const usePhotoGridStore = create<PhotoGridState>()(
       theme: "system",
       photos: [],
       currentPage: 0,
+      lastExportAt: null,
 
       addPhotos: (newPhotos) => {
         set((state) => {
@@ -207,6 +218,10 @@ export const usePhotoGridStore = create<PhotoGridState>()(
         set({ currentPage: page });
         return true;
       },
+
+      // `lastExportAt` reste hors `partialize` : signal volatile de session,
+      // il ne doit pas survivre à un reload (sinon relance fantôme au démarrage).
+      markExportSuccess: () => set({ lastExportAt: Date.now() }),
     }),
     {
       name: "photogrid-storage",

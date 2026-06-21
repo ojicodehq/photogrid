@@ -48,3 +48,6 @@ node_modules/.tmp
 
 # Rapports d'audit locaux (jamais dans le repo public)
 docs/security-audit-*.md
+
+# Mockups de design internes (repo public)
+mockups/

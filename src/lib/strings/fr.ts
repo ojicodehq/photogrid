@@ -236,6 +236,25 @@ export const fr = {
       privacyLabel: "Confidentialité",
     },
   },
+  installPrompt: {
+    android: {
+      titleLead: "Gardez PhotoGrid",
+      titleAccent: "à portée",
+      body: "Installez l'app pour l'ouvrir en un geste, en plein écran et même sans connexion.",
+      install: "Installer l'application",
+      later: "Plus tard",
+    },
+    ios: {
+      title: "Ajouter à l'écran d'accueil",
+      body: "Quelques secondes pour ouvrir PhotoGrid comme une vraie app, hors-ligne.",
+      steps: {
+        share: { action: "Partager", hint: "dans la barre de Safari" },
+        addToHome: { action: "Sur l'écran d'accueil", hint: "" },
+        confirm: { action: "Ajouter", hint: "en haut à droite" },
+      },
+      later: "Plus tard",
+    },
+  },
   errors: {
     permissionDenied:
       "L'accès à vos photos est nécessaire pour utiliser l'application.",
