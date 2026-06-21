@@ -10,10 +10,26 @@ import type { LayoutConfig, PhotoType } from "@/types";
 class WorkerGenerationError extends Error {}
 
 /** Lance la génération PDF dans un Worker dédié (un par impression). */
-function generatePdfViaWorker(
+async function generatePdfViaWorker(
   photos: PhotoType[],
   layout: LayoutConfig,
 ): Promise<Uint8Array> {
+  // Depuis Chrome 137 (mai 2025), les `blob:` URLs sont partitionnées : un
+  // worker dédié ne peut plus `fetch` celles créées par le main thread, donc
+  // toutes les images échouaient à l'embarquement (PDF blanc). On résout donc
+  // les Blobs ICI, sur le main thread (où le fetch est autorisé), et on les
+  // passe au worker : un Blob cloné via postMessage reste lisible, et le worker
+  // en recrée des `blob:` URLs locales (même partition). Les Blobs sont des
+  // handles clonés par référence — aucun pic mémoire, contrairement à une
+  // pré-lecture en ArrayBuffer.
+  const blobs = await Promise.all(
+    photos.map((p) =>
+      fetch(p.uri)
+        .then((r) => r.blob())
+        .catch(() => null),
+    ),
+  );
+
   return new Promise((resolve, reject) => {
     let worker: Worker;
     try {
@@ -33,7 +49,7 @@ function generatePdfViaWorker(
       worker.terminate();
       reject(new Error(e.message || "Chargement du worker PDF échoué"));
     };
-    worker.postMessage({ photos, layout });
+    worker.postMessage({ photos, layout, blobs });
   });
 }
 
