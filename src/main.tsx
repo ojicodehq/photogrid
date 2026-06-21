@@ -8,6 +8,7 @@ import "@fontsource-variable/outfit";
 import "@fontsource-variable/fraunces/wght-italic.css";
 import "@/styles/globals.css";
 
+import { initAnalytics } from "@/lib/analytics";
 import { AppRouter } from "@/AppRouter";
 import { registerServiceWorker } from "@/lib/registerSW";
 
@@ -23,3 +24,4 @@ createRoot(rootElement).render(
 );
 
 registerServiceWorker();
+initAnalytics();
