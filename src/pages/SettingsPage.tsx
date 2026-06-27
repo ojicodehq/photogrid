@@ -255,6 +255,9 @@ export default function SettingsPage() {
                   value={t.settings.about.privacy}
                 />
               </dl>
+              <p className="text-muted-foreground border-border mt-5 border-t pt-4 text-[12px] leading-relaxed">
+                {t.settings.about.privacyNote}
+              </p>
             </section>
           </div>
         </main>

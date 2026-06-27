@@ -234,6 +234,8 @@ export const fr = {
       designedBy: "Conçu par",
       privacy: "100 % local",
       privacyLabel: "Confidentialité",
+      privacyNote:
+        "Vos photos ne quittent jamais cet appareil. Sur la version web, la fréquentation est mesurée de façon anonyme avec Umami, une solution auto-hébergée et sans cookie : aucune donnée personnelle n'est collectée ni transmise à des tiers.",
     },
   },
   installPrompt: {
