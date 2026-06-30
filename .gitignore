@@ -51,3 +51,8 @@ docs/security-audit-*.md
 
 # Mockups de design internes (repo public)
 mockups/
+
+# Stratégie marketing & veille concurrentielle : interne, jamais dans le
+# repo public (positionnement, plan de contenu SEO, profils concurrents).
+.agents/
+competitor-profiles/

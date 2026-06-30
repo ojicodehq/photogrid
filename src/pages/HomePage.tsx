@@ -17,11 +17,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { fr as t } from "@/lib/strings/fr";
+import { useDeepLinkLayout } from "@/lib/useDeepLinkLayout";
 import { usePagination } from "@/lib/usePagination";
 import { usePhotoGridStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export default function HomePage() {
+  // Applique une éventuelle config passée en deep link (page de contenu →
+  // app pré-réglée) avant toute interaction.
+  useDeepLinkLayout();
+
   const photos = usePhotoGridStore((s) => s.photos);
   const clearPhotos = usePhotoGridStore((s) => s.clearPhotos);
   const { photosPerPage } = usePagination();
