@@ -1,0 +1,22 @@
+# PhotoGrid
+
+> Application web gratuite pour imprimer plusieurs photos sur une seule feuille (A4, A5, Letter, Legal), à la taille réelle. Tout se passe dans le navigateur : les photos ne sont jamais envoyées sur un serveur. Sans compte, sans publicité, fonctionne hors-ligne une fois installée. Éditée par Ojicode, open source sous licence AGPL-3.0.
+
+PhotoGrid compose une grille de photos sur une page au format choisi, puis l'imprime ou l'exporte en PDF. La mise en page est calculée en millimètres : ce qui s'affiche à l'écran correspond exactement à la feuille imprimée, sans rognage ni redimensionnement automatique de l'imprimante. L'application existe en version web (PWA installable) et en application Android.
+
+## Guides
+
+- [Imprimer plusieurs photos sur une seule feuille](https://photogrid.ojicode.fr/guides/imprimer-plusieurs-photos-une-feuille): méthode générale, choix de la grille et du format (A4, A5, Letter, Legal).
+- [Imprimer 4 photos sur une page A4](https://photogrid.ojicode.fr/guides/imprimer-4-photos-page-a4): planche 2 × 2 à la taille exacte, outil pré-réglé.
+
+## Application
+
+- [Ouvrir PhotoGrid](https://photogrid.ojicode.fr/): composer une page d'impression directement dans le navigateur.
+
+## Points clés
+
+- Gratuit, sans inscription, sans publicité.
+- Confidentialité : aucune photo n'est envoyée sur un serveur, traitement 100 % local. Fréquentation web mesurée de façon anonyme avec Umami (auto-hébergé, sans cookie).
+- Formats : A4 (210 × 297 mm), A5 (148 × 210 mm), Letter (216 × 279 mm), Legal (216 × 356 mm), en portrait ou paysage.
+- Impression à l'échelle millimétrique exacte, jusqu'à 300 PPI.
+- Open source (AGPL-3.0), code vérifiable sur GitHub.
