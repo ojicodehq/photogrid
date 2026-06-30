@@ -6,3 +6,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://photogrid.ojicode.fr/sitemap.xml
+Sitemap: https://photogrid.ojicode.fr/guides/sitemap.xml

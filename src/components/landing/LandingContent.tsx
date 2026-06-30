@@ -115,6 +115,14 @@ function LandingFooter() {
             {t.landing.footer.tagline}
           </p>
         </div>
+        {/* Lien vers le site de guides (hors SPA) : balise <a> classique pour
+            sortir du HashRouter et laisser le reverse-proxy router /guides. */}
+        <a
+          href="/guides/"
+          className="text-muted-foreground hover:text-foreground text-[14px] underline underline-offset-2"
+        >
+          {t.landing.footer.guides}
+        </a>
       </div>
     </footer>
   );
