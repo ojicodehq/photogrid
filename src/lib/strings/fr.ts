@@ -103,6 +103,7 @@ export const fr = {
     footer: {
       tagline: "Une application Ojicode open source, 100 % hors-ligne et sans compte.",
       cta: "Composer ma première page",
+      guides: "Guides d'impression",
     },
   },
   home: {
