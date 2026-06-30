@@ -40,9 +40,13 @@ describe("parseDeepLinkLayout", () => {
     expect(parse("format=a3")).toEqual({});
   });
 
+  it("accepte les colonnes/lignes dans 1..10 (bornes des sliders)", () => {
+    expect(parse("cols=1&rows=10")).toEqual({ columns: 1, rows: 10 });
+  });
+
   it("rejette les grilles hors bornes ou non entières", () => {
     expect(parse("cols=0")).toEqual({}); // < min
-    expect(parse("cols=13")).toEqual({}); // > max
+    expect(parse("cols=11")).toEqual({}); // > max (sliders plafonnent à 10)
     expect(parse("cols=2.5")).toEqual({}); // non entier
     expect(parse("cols=abc")).toEqual({}); // NaN
     expect(parse("cols=")).toEqual({}); // vide

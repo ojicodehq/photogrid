@@ -1,3 +1,4 @@
+import { PAPER_SIZES } from "@/lib/paperSizes";
 import type {
   FitMode,
   LayoutConfig,
@@ -17,16 +18,19 @@ import type {
  * testable en isolation.
  */
 
-// Formats standards uniquement : pas de "Custom" via URL (éviterait de devoir
-// valider une largeur/hauteur arbitraires).
-const PAGE_SIZES: readonly PageSize[] = ["A4", "A5", "Letter", "Legal"];
+// Formats standards : dérivés de la source de vérité unique (paperSizes.ts).
+// "Custom" est exclu par construction — pas de largeur/hauteur arbitraires via URL.
+const PAGE_SIZES = Object.keys(PAPER_SIZES) as ReadonlyArray<
+  Exclude<PageSize, "Custom">
+>;
 const ORIENTATIONS: readonly PageOrientation[] = ["portrait", "landscape"];
 const FIT_MODES: readonly FitMode[] = ["contain", "cover", "fill"];
 const QUALITIES: readonly QualityLevel[] = ["standard", "high", "max"];
 
-// Bornes alignées sur l'UI (sliders) pour rejeter les valeurs absurdes.
+// Bornes alignées sur les sliders de LayoutConfigPanel pour rejeter les
+// valeurs absurdes (colonnes/lignes : max={10} ; espacement : 0-40 mm).
 const MIN_GRID = 1;
-const MAX_GRID = 12;
+const MAX_GRID = 10;
 const MAX_SPACING = 40; // mm
 
 function matchEnum<T extends string>(
