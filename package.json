@@ -1,6 +1,6 @@
 {
   "name": "photogrid-web",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "private": true,
   "license": "AGPL-3.0-only",
   "author": "Nicodème Cajuste (Ojicode)",
@@ -10,6 +10,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
+    "test": "vitest run",
     "build:android": "npm run build && npx cap sync android",
     "open:android": "npx cap open android",
     "publish:apk": "bash scripts/publish-apk.sh",
@@ -64,6 +65,7 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "typescript-eslint": "^8.18.0",
-    "vite": "^6.0.7"
+    "vite": "^6.0.7",
+    "vitest": "^4.1.9"
   }
 }
