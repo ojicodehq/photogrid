@@ -129,7 +129,7 @@ export default function PreviewPage() {
       />
 
       {/* Desktop top bar */}
-      <header className="no-print border-border bg-card hidden h-16 items-center border-b px-4 lg:flex">
+      <header className="border-border bg-card hidden h-16 items-center border-b px-4 lg:flex">
         <Link
           to="/home"
           className="text-primary hover:bg-secondary/60 -ml-1 flex items-center gap-1 rounded-full px-3 py-2 text-[14px] font-medium transition"
@@ -146,7 +146,7 @@ export default function PreviewPage() {
       </header>
 
       {/* Mobile main */}
-      <main className="no-print flex flex-1 flex-col items-center justify-center px-4 py-6 lg:hidden">
+      <main className="flex flex-1 flex-col items-center justify-center px-4 py-6 lg:hidden">
         <div
           className="overflow-hidden"
           style={{ width: paperWpx * scale, height: paperHpx * scale }}
@@ -163,7 +163,6 @@ export default function PreviewPage() {
               photos={photos}
               layout={layout}
               pageIndex={currentPage}
-              allPages={false}
             />
           </div>
         </div>
@@ -181,7 +180,7 @@ export default function PreviewPage() {
       </main>
 
       {/* Desktop master-detail */}
-      <div className="no-print bg-secondary hidden flex-1 lg:grid lg:grid-cols-[340px_1fr]">
+      <div className="bg-secondary hidden flex-1 lg:grid lg:grid-cols-[340px_1fr]">
         <aside className="border-border bg-card flex max-h-[calc(100dvh-4rem)] flex-col overflow-y-auto border-r">
           {/* Summary */}
           <section className="border-border/60 border-b px-6 py-6">
@@ -297,7 +296,6 @@ export default function PreviewPage() {
                   photos={photos}
                   layout={layout}
                   pageIndex={currentPage}
-                  allPages={false}
                 />
               </div>
             </div>
@@ -322,7 +320,7 @@ export default function PreviewPage() {
       </div>
 
       {/* Mobile FAB */}
-      <div className="no-print fixed right-5 bottom-6 z-10 lg:hidden">
+      <div className="fixed right-5 bottom-6 z-10 lg:hidden">
         <Button
           size="lg"
           aria-label={t.preview.print}

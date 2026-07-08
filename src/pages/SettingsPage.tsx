@@ -62,7 +62,7 @@ export default function SettingsPage() {
       />
 
       {/* Desktop top bar */}
-      <header className="no-print border-border bg-card hidden h-16 items-center border-b px-4 lg:flex">
+      <header className="border-border bg-card hidden h-16 items-center border-b px-4 lg:flex">
         <Link
           to="/home"
           className="text-primary hover:bg-secondary/60 -ml-1 flex items-center gap-1 rounded-full px-3 py-2 text-[14px] font-medium transition"
