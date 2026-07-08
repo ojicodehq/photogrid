@@ -1,14 +1,8 @@
-import {
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  Info,
-  SunMedium,
-} from "lucide-react";
-import { Link } from "react-router-dom";
+import { ChevronRight, Download, Info, SunMedium } from "lucide-react";
 
 import { OjicodeWordmark } from "@/components/brand/OjicodeWordmark";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { DesktopBackBar } from "@/components/layout/DesktopBackBar";
 import { useLiveVersion } from "@/lib/appVersion";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -48,21 +42,7 @@ export default function SettingsPage() {
       />
 
       {/* Desktop top bar */}
-      <header className="border-border bg-card hidden h-16 items-center border-b px-4 lg:flex">
-        <Link
-          to="/home"
-          className="text-primary hover:bg-secondary/60 -ml-1 flex items-center gap-1 rounded-full px-3 py-2 text-[14px] font-medium transition"
-        >
-          <ChevronLeft className="size-4" strokeWidth={2.5} />
-          {t.preview.empty.back}
-        </Link>
-        <div className="flex flex-1 justify-center">
-          <span className="font-display text-[15px] font-semibold tracking-tight">
-            {t.settings.title}
-          </span>
-        </div>
-        <div className="w-[110px]" />
-      </header>
+      <DesktopBackBar title={t.settings.title} />
 
       {/* Mobile main */}
       <main className="flex-1 space-y-3 px-5 py-6 lg:hidden">
