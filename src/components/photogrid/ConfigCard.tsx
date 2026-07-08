@@ -9,21 +9,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { fr as t } from "@/lib/strings/fr";
+import { marginsUniform, orientationLabel } from "@/lib/layoutFormat";
 import { usePhotoGridStore } from "@/lib/store";
+import { fr as t } from "@/lib/strings/fr";
 import type { LayoutConfig } from "@/types";
 
 function summarizeLayout(layout: LayoutConfig): string {
   const grid = `${layout.columns} × ${layout.rows}`;
-  const orientationLabel =
-    layout.orientation === "portrait"
-      ? t.config.orientation.portrait.toLowerCase()
-      : t.config.orientation.landscape.toLowerCase();
-  const m = layout.margins;
-  const allMarginsEqual =
-    m.top === m.right && m.right === m.bottom && m.bottom === m.left;
-  const marginsLabel = allMarginsEqual ? `${m.top} mm` : "marges variées";
-  return `${grid} · ${layout.pageSize} ${orientationLabel} · ${marginsLabel}`;
+  const marginsLabel = marginsUniform(layout.margins)
+    ? `${layout.margins.top} mm`
+    : "marges variées";
+  return `${grid} · ${layout.pageSize} ${orientationLabel(
+    layout.orientation,
+  )} · ${marginsLabel}`;
 }
 
 /**

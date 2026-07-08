@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 
 import { LivePreviewCard } from "@/components/photogrid/LivePreviewCard";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
+  SegmentedControl,
+  type SegmentedOption,
+} from "@/components/ui/segmented-control";
+import { Slider } from "@/components/ui/slider";
 import { fr as t } from "@/lib/strings/fr";
 import { usePhotoGridStore } from "@/lib/store";
 import { useDebouncedCallback } from "@/lib/useDebounce";
@@ -29,11 +29,28 @@ const GRID_PRESETS: ReadonlyArray<{ label: string; columns: number; rows: number
   { label: "5 × 5", columns: 5, rows: 5 },
 ];
 
-const PAGE_SIZES: ReadonlyArray<{ label: string; value: PageSize }> = [
+const PAGE_SIZES: ReadonlyArray<SegmentedOption<Exclude<PageSize, "Custom">>> = [
   { label: "A4", value: "A4" },
   { label: "A5", value: "A5" },
   { label: "Letter", value: "Letter" },
   { label: "Legal", value: "Legal" },
+];
+
+const ORIENTATIONS: ReadonlyArray<SegmentedOption<PageOrientation>> = [
+  { label: t.config.orientation.portrait, value: "portrait" },
+  { label: t.config.orientation.landscape, value: "landscape" },
+];
+
+const FIT_MODES: ReadonlyArray<SegmentedOption<FitMode>> = [
+  { label: t.config.fitMode.contain, value: "contain" },
+  { label: t.config.fitMode.cover, value: "cover" },
+  { label: t.config.fitMode.fill, value: "fill" },
+];
+
+const QUALITIES: ReadonlyArray<SegmentedOption<QualityLevel>> = [
+  { label: t.config.quality.standard, value: "standard" },
+  { label: t.config.quality.high, value: "high" },
+  { label: t.config.quality.max, value: "max" },
 ];
 
 /**
@@ -107,105 +124,44 @@ export function LayoutConfigPanel() {
       {/* Section : Format de page */}
       <Section label={t.config.sections.format}>
         <SubLabel>{t.config.pageSize}</SubLabel>
-        <ToggleGroup
-          value={[layout.pageSize]}
-          onValueChange={(values) => {
-            const v = values[0] as PageSize | undefined;
-            if (v) updateLayout({ pageSize: v });
-          }}
-          className="bg-secondary mt-2 grid h-10 w-full grid-cols-4 rounded-full p-1"
-        >
-          {PAGE_SIZES.map((s) => (
-            <ToggleGroupItem
-              key={s.value}
-              value={s.value}
-              className="rounded-full text-[13px] font-medium data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
-            >
-              {s.label}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        <SegmentedControl
+          ariaLabel={t.config.pageSize}
+          options={PAGE_SIZES}
+          value={layout.pageSize as Exclude<PageSize, "Custom">}
+          onChange={(pageSize) => updateLayout({ pageSize })}
+          className="mt-2 grid h-10 w-full grid-cols-4"
+          itemClassName="text-[13px]"
+        />
 
         <SubLabel className="mt-4">{t.config.orientation.label}</SubLabel>
-        <ToggleGroup
-          value={[layout.orientation]}
-          onValueChange={(values) => {
-            const v = values[0] as PageOrientation | undefined;
-            if (v) updateLayout({ orientation: v });
-          }}
-          className="bg-secondary mt-2 grid h-10 w-full grid-cols-2 rounded-full p-1"
-        >
-          <ToggleGroupItem
-            value="portrait"
-            className="rounded-full text-[13px] font-medium data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
-          >
-            {t.config.orientation.portrait}
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="landscape"
-            className="rounded-full text-[13px] font-medium data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
-          >
-            {t.config.orientation.landscape}
-          </ToggleGroupItem>
-        </ToggleGroup>
+        <SegmentedControl
+          ariaLabel={t.config.orientation.label}
+          options={ORIENTATIONS}
+          value={layout.orientation}
+          onChange={(orientation) => updateLayout({ orientation })}
+          className="mt-2 grid h-10 w-full grid-cols-2"
+          itemClassName="text-[13px]"
+        />
 
         <SubLabel className="mt-4">{t.config.fitMode.label}</SubLabel>
-        <ToggleGroup
-          value={[layout.fitMode]}
-          onValueChange={(values) => {
-            const v = values[0] as FitMode | undefined;
-            if (v) updateLayout({ fitMode: v });
-          }}
-          className="bg-secondary mt-2 grid h-10 w-full grid-cols-3 rounded-full p-1"
-        >
-          <ToggleGroupItem
-            value="contain"
-            className="rounded-full text-[13px] font-medium data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
-          >
-            {t.config.fitMode.contain}
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="cover"
-            className="rounded-full text-[13px] font-medium data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
-          >
-            {t.config.fitMode.cover}
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="fill"
-            className="rounded-full text-[13px] font-medium data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
-          >
-            {t.config.fitMode.fill}
-          </ToggleGroupItem>
-        </ToggleGroup>
+        <SegmentedControl
+          ariaLabel={t.config.fitMode.label}
+          options={FIT_MODES}
+          value={layout.fitMode}
+          onChange={(fitMode) => updateLayout({ fitMode })}
+          className="mt-2 grid h-10 w-full grid-cols-3"
+          itemClassName="text-[13px]"
+        />
 
         <SubLabel className="mt-4">{t.config.quality.label}</SubLabel>
-        <ToggleGroup
-          value={[layout.quality]}
-          onValueChange={(values) => {
-            const v = values[0] as QualityLevel | undefined;
-            if (v) updateLayout({ quality: v });
-          }}
-          className="bg-secondary mt-2 grid h-10 w-full grid-cols-3 rounded-full p-1"
-        >
-          <ToggleGroupItem
-            value="standard"
-            className="rounded-full text-[13px] font-medium data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
-          >
-            {t.config.quality.standard}
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="high"
-            className="rounded-full text-[13px] font-medium data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
-          >
-            {t.config.quality.high}
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="max"
-            className="rounded-full text-[13px] font-medium data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
-          >
-            {t.config.quality.max}
-          </ToggleGroupItem>
-        </ToggleGroup>
+        <SegmentedControl
+          ariaLabel={t.config.quality.label}
+          options={QUALITIES}
+          value={layout.quality}
+          onChange={(quality) => updateLayout({ quality })}
+          className="mt-2 grid h-10 w-full grid-cols-3"
+          itemClassName="text-[13px]"
+        />
         <p className="text-muted-foreground mt-2 text-[12px]">
           {t.config.quality.hint}
         </p>

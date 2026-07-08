@@ -1,21 +1,14 @@
-import { useEffect, useState } from "react";
-
 import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
 
-import { usePhotoGridStore } from "@/lib/store";
+import { useThemeControl } from "@/lib/useThemeControl";
 
 /**
  * Bascule clair / sombre pour la barre de navigation de la landing.
- * Reste cohérent avec les réglages de l'app : met à jour next-themes ET le
- * store persistant (même logique que SettingsPage).
+ * Reste cohérent avec les réglages de l'app : `useThemeControl` met à jour
+ * next-themes ET le store persistant en un seul point.
  */
 export function ThemeToggle() {
-  const { resolvedTheme, setTheme: setNextTheme } = useTheme();
-  const setStoreTheme = usePhotoGridStore((s) => s.setTheme);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const { mounted, resolvedTheme, setTheme } = useThemeControl();
 
   // Avant le montage, on réserve l'espace pour éviter tout décalage / flash.
   if (!mounted) {
@@ -23,12 +16,7 @@ export function ThemeToggle() {
   }
 
   const isDark = resolvedTheme === "dark";
-
-  const toggle = () => {
-    const next = isDark ? "light" : "dark";
-    setStoreTheme(next);
-    setNextTheme(next);
-  };
+  const toggle = () => setTheme(isDark ? "light" : "dark");
 
   return (
     <button

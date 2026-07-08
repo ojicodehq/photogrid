@@ -152,7 +152,7 @@ export default function HomePage() {
 
       {/* Mobile FAB */}
       {hasPhotos ? (
-        <div className="no-print fixed right-5 bottom-8 z-10 lg:hidden">
+        <div className="fixed right-5 bottom-8 z-10 lg:hidden">
           <Link
             to="/preview"
             className={cn(

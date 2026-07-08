@@ -34,7 +34,7 @@ export function AppHeader({
     return (
       <header
         className={cn(
-          "no-print sticky top-0 z-30 border-b border-border/60",
+          "sticky top-0 z-30 border-b border-border/60",
           "bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60",
           className,
         )}
@@ -85,7 +85,7 @@ export function AppHeader({
   return (
     <header
       className={cn(
-        "no-print pt-6 pb-3 px-5",
+        "pt-6 pb-3 px-5",
         className,
       )}
     >

@@ -12,36 +12,20 @@ const FIT_MAP: Record<FitMode, CSSProperties["objectFit"]> = {
 type PhotoGridProps = {
   photos: PhotoType[];
   layout: LayoutConfig;
-  /** Page à afficher (0-indexée). Ignorée si `allPages` est true. */
+  /** Page à afficher (0-indexée). */
   pageIndex?: number;
-  /**
-   * Si `true`, rend toutes les pages les unes sous les autres en taille
-   * réelle (utilisé par PrintFrame pour l'impression).
-   * Si `false`, rend uniquement la page courante (preview).
-   */
-  allPages?: boolean;
-  /** Active la classe `print-page` (page-break + masquage écran). */
-  printPages?: boolean;
 };
 
 /**
- * Grille de photos en CSS grid.
+ * Grille de photos en CSS grid, rendant la page courante de l'aperçu.
  *
  * Le conteneur fait la taille du papier en `mm` exact. Le `gap` de la
- * grille produit l'espacement réel à l'impression. Les marges sont
- * appliquées en `padding` mm.
- *
- * Aucun calcul de pixel/DPI : le navigateur convertit `mm` en physique
- * à l'impression et en `px` à l'écran selon le `transform: scale()`
- * appliqué par le parent.
+ * grille produit l'espacement réel ; les marges sont appliquées en
+ * `padding` mm. Aucun calcul de pixel/DPI : le navigateur convertit `mm`
+ * en `px` à l'écran selon le `transform: scale()` appliqué par le parent
+ * (l'impression, elle, passe par le PDF vectoriel — cf. `printService`).
  */
-export function PhotoGrid({
-  photos,
-  layout,
-  pageIndex = 0,
-  allPages = false,
-  printPages = false,
-}: PhotoGridProps) {
+export function PhotoGrid({ photos, layout, pageIndex = 0 }: PhotoGridProps) {
   const paper = getPaperDimensionsMm(layout.pageSize, layout.orientation, {
     width: layout.customWidth,
     height: layout.customHeight,
@@ -50,43 +34,25 @@ export function PhotoGrid({
   const photosPerPage = Math.max(1, layout.rows * layout.columns);
   const totalPages = Math.max(1, Math.ceil(photos.length / photosPerPage));
 
-  const renderedPages = allPages
-    ? Array.from({ length: totalPages }, (_, i) => i)
-    : [Math.min(pageIndex, totalPages - 1)];
+  const page = Math.min(pageIndex, totalPages - 1);
+  const start = page * photosPerPage;
+  const pagePhotos = photos.slice(start, start + photosPerPage);
 
-  return (
-    <>
-      {renderedPages.map((p) => {
-        const start = p * photosPerPage;
-        const pagePhotos = photos.slice(start, start + photosPerPage);
-        return (
-          <PhotoPage
-            key={p}
-            paper={paper}
-            layout={layout}
-            photos={pagePhotos}
-            printPage={printPages}
-          />
-        );
-      })}
-    </>
-  );
+  return <PhotoPage paper={paper} layout={layout} photos={pagePhotos} />;
 }
 
 function PhotoPage({
   paper,
   layout,
   photos,
-  printPage,
 }: {
   paper: { width: number; height: number };
   layout: LayoutConfig;
   photos: PhotoType[];
-  printPage: boolean;
 }) {
   return (
     <section
-      className={printPage ? "print-page" : "bg-white shadow-md"}
+      className="bg-white shadow-md"
       style={{
         width: `${paper.width}mm`,
         height: `${paper.height}mm`,

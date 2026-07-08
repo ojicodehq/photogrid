@@ -38,53 +38,20 @@ export function usePagination() {
     [setCurrentPage],
   );
 
-  const goToFirstPage = useCallback(
-    () => setCurrentPage(0),
-    [setCurrentPage],
-  );
-
-  const goToLastPage = useCallback(
-    () => setCurrentPage(totalPages - 1),
-    [totalPages, setCurrentPage],
-  );
-
   const currentPagePhotos = useMemo(() => {
     const start = currentPage * photosPerPage;
     return photos.slice(start, start + photosPerPage);
   }, [currentPage, photosPerPage, photos]);
-
-  const pageInfo = useMemo(
-    () => ({
-      current: currentPage + 1,
-      total: totalPages,
-      photosOnPage: currentPagePhotos.length,
-      startIndex: currentPage * photosPerPage,
-      endIndex: Math.min(
-        (currentPage + 1) * photosPerPage,
-        photos.length,
-      ),
-    }),
-    [
-      currentPage,
-      totalPages,
-      currentPagePhotos.length,
-      photosPerPage,
-      photos.length,
-    ],
-  );
 
   return {
     currentPage,
     totalPages,
     photosPerPage,
     currentPagePhotos,
-    pageInfo,
     canGoPrev,
     canGoNext,
     goToNextPage,
     goToPrevPage,
     goToPage,
-    goToFirstPage,
-    goToLastPage,
   };
 }

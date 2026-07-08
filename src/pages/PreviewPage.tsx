@@ -1,12 +1,14 @@
-import { ChevronLeft, Loader2, Pencil, Printer } from "lucide-react";
+import { Loader2, Pencil, Printer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { AppHeader } from "@/components/layout/AppHeader";
+import { DesktopBackBar } from "@/components/layout/DesktopBackBar";
 import { PaginationControls } from "@/components/photogrid/PaginationControls";
 import { PhotoGrid } from "@/components/photogrid/PhotoGrid";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { marginsUniform, orientationLabel } from "@/lib/layoutFormat";
 import { getPaperDimensionsMm } from "@/lib/paperSizes";
 import { fr as t } from "@/lib/strings/fr";
 import { usePhotoGridStore } from "@/lib/store";
@@ -32,7 +34,6 @@ export default function PreviewPage() {
     goToNextPage,
     goToPrevPage,
     goToPage,
-    pageInfo,
   } = usePagination();
 
   const [scale, setScale] = useState(0.3);
@@ -130,49 +131,18 @@ export default function PreviewPage() {
       />
 
       {/* Desktop top bar */}
-      <header className="no-print border-border bg-card hidden h-16 items-center border-b px-4 lg:flex">
-        <Link
-          to="/home"
-          className="text-primary hover:bg-secondary/60 -ml-1 flex items-center gap-1 rounded-full px-3 py-2 text-[14px] font-medium transition"
-        >
-          <ChevronLeft className="size-4" strokeWidth={2.5} />
-          {t.preview.empty.back}
-        </Link>
-        <div className="flex flex-1 justify-center">
-          <span className="font-display text-[15px] font-semibold tracking-tight">
-            {t.preview.title}
-          </span>
-        </div>
-        <div className="w-[110px]" />
-      </header>
+      <DesktopBackBar title={t.preview.title} />
 
       {/* Mobile main */}
-      <main className="no-print flex flex-1 flex-col items-center justify-center px-4 py-6 lg:hidden">
-        <div
-          className="overflow-hidden"
-          style={{ width: paperWpx * scale, height: paperHpx * scale }}
-        >
-          <div
-            style={{
-              width: paperWpx,
-              height: paperHpx,
-              transform: `scale(${scale})`,
-              transformOrigin: "top left",
-            }}
-          >
-            <PhotoGrid
-              photos={photos}
-              layout={layout}
-              pageIndex={currentPage}
-              allPages={false}
-            />
-          </div>
-        </div>
+      <main className="flex flex-1 flex-col items-center justify-center px-4 py-6 lg:hidden">
+        <PreviewStage paperWpx={paperWpx} paperHpx={paperHpx} scale={scale}>
+          <PhotoGrid photos={photos} layout={layout} pageIndex={currentPage} />
+        </PreviewStage>
 
         {totalPages > 1 ? (
           <PaginationControls
-            current={pageInfo.current}
-            total={pageInfo.total}
+            current={currentPage + 1}
+            total={totalPages}
             canGoPrev={canGoPrev}
             canGoNext={canGoNext}
             onPrev={goToPrevPage}
@@ -182,7 +152,7 @@ export default function PreviewPage() {
       </main>
 
       {/* Desktop master-detail */}
-      <div className="no-print bg-secondary hidden flex-1 lg:grid lg:grid-cols-[340px_1fr]">
+      <div className="bg-secondary hidden flex-1 lg:grid lg:grid-cols-[340px_1fr]">
         <aside className="border-border bg-card flex max-h-[calc(100dvh-4rem)] flex-col overflow-y-auto border-r">
           {/* Summary */}
           <section className="border-border/60 border-b px-6 py-6">
@@ -191,11 +161,7 @@ export default function PreviewPage() {
               <SummaryRow label={t.config.sections.grid} value={`${layout.columns} × ${layout.rows}`} />
               <SummaryRow
                 label={t.config.pageSize}
-                value={`${layout.pageSize} ${
-                  layout.orientation === "portrait"
-                    ? t.config.orientation.portrait.toLowerCase()
-                    : t.config.orientation.landscape.toLowerCase()
-                }`}
+                value={`${layout.pageSize} ${orientationLabel(layout.orientation)}`}
               />
               <SummaryRow
                 label={t.config.spacing}
@@ -282,32 +248,15 @@ export default function PreviewPage() {
 
         <main className="flex max-h-[calc(100dvh-4rem)] flex-col items-center overflow-y-auto px-10 py-10">
           <div className="flex flex-1 items-center justify-center overflow-hidden">
-            <div
-              className="overflow-hidden"
-              style={{ width: paperWpx * scale, height: paperHpx * scale }}
-            >
-              <div
-                style={{
-                  width: paperWpx,
-                  height: paperHpx,
-                  transform: `scale(${scale})`,
-                  transformOrigin: "top left",
-                }}
-              >
-                <PhotoGrid
-                  photos={photos}
-                  layout={layout}
-                  pageIndex={currentPage}
-                  allPages={false}
-                />
-              </div>
-            </div>
+            <PreviewStage paperWpx={paperWpx} paperHpx={paperHpx} scale={scale}>
+              <PhotoGrid photos={photos} layout={layout} pageIndex={currentPage} />
+            </PreviewStage>
           </div>
 
           {totalPages > 1 ? (
             <PaginationControls
-              current={pageInfo.current}
-              total={pageInfo.total}
+              current={currentPage + 1}
+              total={totalPages}
               canGoPrev={canGoPrev}
               canGoNext={canGoNext}
               onPrev={goToPrevPage}
@@ -323,7 +272,7 @@ export default function PreviewPage() {
       </div>
 
       {/* Mobile FAB */}
-      <div className="no-print fixed right-5 bottom-6 z-10 lg:hidden">
+      <div className="fixed right-5 bottom-6 z-10 lg:hidden">
         <Button
           size="lg"
           aria-label={t.preview.print}
@@ -339,6 +288,41 @@ export default function PreviewPage() {
           )}
           <span>{printing ? t.preview.printing : t.preview.print}</span>
         </Button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Scène d'aperçu : la feuille est rendue à sa taille CSS réelle (mm→px) puis
+ * mise à l'échelle via `transform: scale()`, le tout clippé à la taille visible.
+ * Le rendu imprimé (PDF) ne dépend pas de cette échelle — c'est un aperçu.
+ */
+function PreviewStage({
+  paperWpx,
+  paperHpx,
+  scale,
+  children,
+}: {
+  paperWpx: number;
+  paperHpx: number;
+  scale: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className="overflow-hidden"
+      style={{ width: paperWpx * scale, height: paperHpx * scale }}
+    >
+      <div
+        style={{
+          width: paperWpx,
+          height: paperHpx,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
+      >
+        {children}
       </div>
     </div>
   );
@@ -405,10 +389,7 @@ function PageThumb({
 }
 
 function marginsSummary(layout: LayoutConfig): string {
-  const m = layout.margins;
-  const allEqual =
-    m.top === m.right && m.right === m.bottom && m.bottom === m.left;
-  return allEqual ? `${m.top} mm` : "variées";
+  return marginsUniform(layout.margins) ? `${layout.margins.top} mm` : "variées";
 }
 
 function fitModeLabel(mode: LayoutConfig["fitMode"]): string {

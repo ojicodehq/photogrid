@@ -26,7 +26,7 @@ export function PaginationControls({
 }: Props) {
   return (
     <div
-      className="no-print mt-4 flex items-center justify-center gap-3"
+      className="mt-4 flex items-center justify-center gap-3"
       aria-label={t.preview.pageOf(current, total)}
     >
       <Button
