@@ -6,8 +6,6 @@ import {
   SunMedium,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useTheme } from "next-themes";
-import { useSyncExternalStore } from "react";
 
 import { OjicodeWordmark } from "@/components/brand/OjicodeWordmark";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -19,14 +17,10 @@ import {
   type SegmentedOption,
 } from "@/components/ui/segmented-control";
 import { fr as t } from "@/lib/strings/fr";
-import { usePhotoGridStore } from "@/lib/store";
 import { useInstallPrompt } from "@/lib/useInstallPrompt";
+import { useThemeControl } from "@/lib/useThemeControl";
 import { cn } from "@/lib/utils";
 import type { ThemePreference } from "@/types";
-
-const subscribe = () => () => {};
-const getClientSnapshot = () => true;
-const getServerSnapshot = () => false;
 
 const THEME_OPTIONS: ReadonlyArray<SegmentedOption<ThemePreference>> = [
   { label: t.settings.theme.light, value: "light" },
@@ -35,21 +29,13 @@ const THEME_OPTIONS: ReadonlyArray<SegmentedOption<ThemePreference>> = [
 ];
 
 export default function SettingsPage() {
-  const { setTheme: setNextTheme } = useTheme();
-  const themePref = usePhotoGridStore((s) => s.theme);
-  const setStoreTheme = usePhotoGridStore((s) => s.setTheme);
-  const mounted = useSyncExternalStore(
-    subscribe,
-    getClientSnapshot,
-    getServerSnapshot,
-  );
+  const {
+    mounted,
+    preference: themePref,
+    setTheme: applyTheme,
+  } = useThemeControl();
   const { available: canInstall, promptInstall } = useInstallPrompt();
   const version = useLiveVersion();
-
-  const applyTheme = (pref: ThemePreference) => {
-    setStoreTheme(pref);
-    setNextTheme(pref);
-  };
 
   return (
     <div className="flex min-h-dvh flex-col">
