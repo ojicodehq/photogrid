@@ -15,9 +15,9 @@ import { useLiveVersion } from "@/lib/appVersion";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
+  SegmentedControl,
+  type SegmentedOption,
+} from "@/components/ui/segmented-control";
 import { fr as t } from "@/lib/strings/fr";
 import { usePhotoGridStore } from "@/lib/store";
 import { useInstallPrompt } from "@/lib/useInstallPrompt";
@@ -27,6 +27,12 @@ import type { ThemePreference } from "@/types";
 const subscribe = () => () => {};
 const getClientSnapshot = () => true;
 const getServerSnapshot = () => false;
+
+const THEME_OPTIONS: ReadonlyArray<SegmentedOption<ThemePreference>> = [
+  { label: t.settings.theme.light, value: "light" },
+  { label: t.settings.theme.dark, value: "dark" },
+  { label: t.settings.theme.system, value: "system" },
+];
 
 export default function SettingsPage() {
   const { setTheme: setNextTheme } = useTheme();
@@ -81,33 +87,13 @@ export default function SettingsPage() {
           <div className="mt-3 flex items-center justify-between">
             <span className="text-[15px] font-medium">{t.settings.theme.label}</span>
             {mounted && (
-              <ToggleGroup
-                value={[themePref]}
-                onValueChange={(values) => {
-                  const v = values[0];
-                  if (v) applyTheme(v as ThemePreference);
-                }}
-                className="bg-secondary rounded-full p-1"
-              >
-                <ToggleGroupItem
-                  value="light"
-                  className="rounded-full px-3 text-xs data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
-                >
-                  {t.settings.theme.light}
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="dark"
-                  className="rounded-full px-3 text-xs data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
-                >
-                  {t.settings.theme.dark}
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="system"
-                  className="rounded-full px-3 text-xs data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary data-[pressed]:hover:text-primary-foreground"
-                >
-                  {t.settings.theme.system}
-                </ToggleGroupItem>
-              </ToggleGroup>
+              <SegmentedControl
+                ariaLabel={t.settings.theme.label}
+                options={THEME_OPTIONS}
+                value={themePref}
+                onChange={applyTheme}
+                itemClassName="px-3 text-xs"
+              />
             )}
           </div>
         </section>
