@@ -32,7 +32,6 @@ export default function PreviewPage() {
     goToNextPage,
     goToPrevPage,
     goToPage,
-    pageInfo,
   } = usePagination();
 
   const [scale, setScale] = useState(0.3);
@@ -171,8 +170,8 @@ export default function PreviewPage() {
 
         {totalPages > 1 ? (
           <PaginationControls
-            current={pageInfo.current}
-            total={pageInfo.total}
+            current={currentPage + 1}
+            total={totalPages}
             canGoPrev={canGoPrev}
             canGoNext={canGoNext}
             onPrev={goToPrevPage}
@@ -306,8 +305,8 @@ export default function PreviewPage() {
 
           {totalPages > 1 ? (
             <PaginationControls
-              current={pageInfo.current}
-              total={pageInfo.total}
+              current={currentPage + 1}
+              total={totalPages}
               canGoPrev={canGoPrev}
               canGoNext={canGoNext}
               onPrev={goToPrevPage}
