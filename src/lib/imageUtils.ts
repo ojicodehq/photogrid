@@ -1,4 +1,4 @@
-import { prepareImage } from "@/lib/imageDownscale";
+import { prepareImage, type PreparedImage } from "@/lib/imageDownscale";
 import type { PhotoType } from "@/types";
 
 /**
@@ -51,56 +51,30 @@ export async function fileToPhoto(file: File): Promise<PhotoImportResult> {
       // Module exifr indisponible : orientation 1.
     }
 
-    let blob: Blob;
-    let thumbBlob: Blob | undefined;
-    // Assignés dans les deux branches ci-dessous ; tout échec du fallback
-    // relance vers le `catch` externe (→ `null`), jamais lus non initialisés.
-    let width!: number;
-    let height!: number;
-    let exifOrientation: number | undefined;
-    let type: string | undefined;
-    let size: number | undefined;
-
-    try {
-      const prepared = await prepareImage(file, orientation);
-      blob = prepared.blob;
-      thumbBlob = prepared.thumbBlob;
-      width = prepared.width;
-      height = prepared.height;
-      exifOrientation = prepared.exifOrientation;
-      type = prepared.type;
-      size = prepared.size;
-    } catch {
-      // `createImageBitmap` indisponible / format exotique : on garde les
-      // octets originaux et on lit les dimensions via `<img>`.
-      blob = file;
-      exifOrientation = orientation;
-      type = file.type;
-      size = file.size;
-      const probe = URL.createObjectURL(file);
-      try {
-        const dims = await readImageDimensions(probe, orientation);
-        width = dims.width;
-        height = dims.height;
-      } finally {
-        URL.revokeObjectURL(probe);
-      }
-    }
+    // `prepareImage` échoue si `createImageBitmap` est indisponible / refuse le
+    // format : on retombe alors sur les octets originaux, sondés via `<img>`.
+    // Les deux chemins renvoient la même forme `PreparedImage`, donc la
+    // construction du `PhotoType` en aval est unique.
+    const prepared = await prepareImage(file, orientation).catch(() =>
+      probeOriginal(file, orientation),
+    );
 
     return {
       ok: true,
       photo: {
         id: crypto.randomUUID(),
-        uri: URL.createObjectURL(blob),
+        uri: URL.createObjectURL(prepared.blob),
         // Pas de vignette (format exotique tombé sur le fallback) →
         // l'affichage retombe sur le plein-res.
-        thumbUri: thumbBlob ? URL.createObjectURL(thumbBlob) : undefined,
-        width,
-        height,
+        thumbUri: prepared.thumbBlob
+          ? URL.createObjectURL(prepared.thumbBlob)
+          : undefined,
+        width: prepared.width,
+        height: prepared.height,
         name: file.name,
-        type,
-        size,
-        exifOrientation,
+        type: prepared.type,
+        size: prepared.size,
+        exifOrientation: prepared.exifOrientation,
       },
     };
   } catch (err) {
@@ -112,6 +86,35 @@ export async function fileToPhoto(file: File): Promise<PhotoImportResult> {
         ? `${err.name}: ${err.message}`
         : String(err);
     return { ok: false, name: file.name, reason };
+  }
+}
+
+/**
+ * Repli de `prepareImage` : garde les octets originaux du fichier et sonde
+ * seulement ses dimensions via `<img>` (aucune vignette, l'affichage retombe
+ * sur le plein-res). Renvoie la même forme que `prepareImage` pour que
+ * `fileToPhoto` construise le `PhotoType` sans distinguer les deux chemins.
+ * Lève si le décodage `<img>` échoue lui aussi (→ import rejeté en amont).
+ */
+async function probeOriginal(
+  file: File,
+  orientation: number,
+): Promise<PreparedImage> {
+  const probe = URL.createObjectURL(file);
+  try {
+    const { width, height } = await readImageDimensions(probe, orientation);
+    return {
+      blob: file,
+      width,
+      height,
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      exifOrientation: orientation,
+      thumbBlob: undefined,
+    };
+  } finally {
+    URL.revokeObjectURL(probe);
   }
 }
 
