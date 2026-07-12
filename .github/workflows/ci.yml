@@ -1,0 +1,53 @@
+name: CI
+
+# The floor: lint, types, unit tests, build — on every pull request and on the default
+# branch. About two minutes.
+#
+# It does not prove the app is right. It proves it compiles, it types, its lint is clean,
+# and the tests that exist actually pass. Before this, none of that was checked anywhere
+# except on the developer's own machine, which is the one place a "works for me" is
+# guaranteed.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, types, unit tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+          cache: npm
+
+      # `ci`, never `install`: deterministic, and it FAILS when the lockfile has drifted
+      # from package.json rather than quietly fixing it up.
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      # The highest-yield check here, and it costs seconds.
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm test
+
+      # Last, because it is the slowest, and there is nothing to learn from building code
+      # that does not typecheck.
+      - name: Build
+        run: npm run build
